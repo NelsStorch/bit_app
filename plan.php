@@ -95,6 +95,11 @@
 
     <!-- Werkzeugleiste -->
     <div class="bg-white shadow-md p-2 flex items-center space-x-2 print:hidden toolbar">
+        <a href="index.html" class="toolbar-item p-2 border rounded-lg flex flex-col items-center text-black no-underline" title="Zur Startseite">
+             <div class="device-icon">🏠</div>
+             <span class="text-xs mt-1">Home</span>
+        </a>
+        <div class="w-px h-10 bg-gray-300 mx-2"></div>
         <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufügen">
             <div class="device-icon">💻</div>
             <span class="text-xs mt-1">PC</span>
@@ -211,7 +216,10 @@
 
         // --- Zeichenfunktionen ---
 
-        /** Zeichnet ein Gerät auf dem Canvas */
+        /**
+         * Zeichnet ein Gerät auf dem Canvas.
+         * @param {Object} device - Das zu zeichnende Gerät-Objekt.
+         */
         function drawDevice(device) {
             ctx.font = `${deviceFontSize}px Arial`;
             const iconTextMetrics = ctx.measureText(device.icon);
@@ -477,6 +485,13 @@
         });
 
         // --- Logik-Funktionen ---
+
+        /**
+         * Fügt ein neues Gerät hinzu.
+         * @param {number} x - X-Koordinate.
+         * @param {number} y - Y-Koordinate.
+         * @param {string} type - Typ des Geräts (pc, router, etc.).
+         */
         function addDevice(x, y, type) {
             const deviceData = deviceProperties[type];
             if (!deviceData) return;
@@ -687,6 +702,14 @@
             return neighbors;
         }
 
+        /**
+         * Findet einen Pfad zwischen zwei Geräten (BFS).
+         * @param {Object} startDevice - Startgerät.
+         * @param {Object} endDevice - Zielgerät.
+         * @param {Array} allDevices - Liste aller Geräte.
+         * @param {Array} allConnections - Liste aller Verbindungen.
+         * @returns {Array|null} Array von Geräte-IDs oder null, wenn kein Pfad gefunden.
+         */
         function findPath(startDevice, endDevice, allDevices, allConnections) {
             if (!startDevice || !endDevice || startDevice.id === endDevice.id) return null;
 
@@ -843,7 +866,6 @@
         // --- Initialisierung ---
         resizeCanvas();
         updateToolbarButtons();
-        console.log("Netzwerk-Diagrammersteller initialisiert.");
     </script>
 </body>
 </html>
