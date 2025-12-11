@@ -1,3 +1,10 @@
+<!--
+  Datei: router.php
+  Beschreibung: Ein interaktives Lernspiel, bei dem Spieler IP-Pakete an die korrekten Ports
+  oder das Gateway leiten müssen. Es verwendet Canvas-Animationen und Soundeffekte.
+
+  Technologien: HTML5, CSS3, JavaScript, Tone.js (für Audio), Tailwind CSS
+-->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -8,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         :root {
-            /* Dark Mode Theme */
+            /* Dark Mode Theme Variablen */
             --bg-gradient-start: #232526;
             --bg-gradient-end: #414345;
             --container-bg: #2d3436;
@@ -22,9 +29,9 @@
             --primary-accent: #0984e3;
             --primary-accent-dark: #005cb2;
             --success-green: #00b894;
-            --warning-orange: #fdcb6e; /* Still used for combo */
+            --warning-orange: #fdcb6e; /* Verwendet für Combo */
             --danger-red: #d63031;
-            --info-purple: #a29bfe; /* Color for gateway packets */
+            --info-purple: #a29bfe; /* Farbe für Gateway-Pakete */
             --white: #ffffff;
         }
 
@@ -79,7 +86,7 @@
             font-weight: bold; font-size: 1.4em; box-shadow: inset 0 0 15px rgba(0,0,0,0.7), 0 2px 5px rgba(0,0,0,0.3);
             letter-spacing: 3px; text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
         }
-        #router-visualization::before, #router-visualization::after { /* Blinking lights */
+        #router-visualization::before, #router-visualization::after { /* Blinkende Lichter */
             background-color: var(--success-green); box-shadow: 0 0 6px var(--success-green);
              content: ''; position: absolute; width: 8px; height: 8px; border-radius: 50%;
              animation: blink 1.5s infinite alternate;
@@ -138,7 +145,6 @@
         }
         .packet-icon { font-size: 1.8em; margin-bottom: 8px; }
         .packet-icon.bad { color: var(--danger-red); }
-        /* Removed unknown-net, renamed unknown-gw */
         .packet-icon.external { color: var(--info-purple); }
 
         #ip-table-container, #score-container {
@@ -154,21 +160,20 @@
         #ip-table th, #ip-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border-color); }
         #ip-table th { background-color: var(--component-light-bg); color: var(--primary-accent); font-weight: 600; }
         #ip-table tr:last-child td { border-bottom: none; }
-        /* Removed new-entry highlight as table is static now */
 
         #score-display, #highscore-display, #error-display, #level-display { font-size: 1.1em; margin-bottom: 8px; }
         #error-display span { color: var(--danger-red); font-weight: bold; }
         #combo-display { font-size: 0.9em; color: var(--warning-orange); font-weight: bold; margin-top: 5px; height: 1.2em; }
 
         /* Overlays */
-        #game-over-screen, #start-screen { /* ... */
+        #game-over-screen, #start-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85);
             color: white; display: flex; flex-direction: column; justify-content: center; align-items: center;
             z-index: 100; border-radius: 20px; text-align: center; transition: opacity 0.4s ease-in-out; }
         #game-over-screen.hidden-overlay, #start-screen.hidden-overlay { opacity: 0; pointer-events: none; }
         #game-over-screen h2, #start-screen h2 { font-size: 2.8em; margin-bottom: 25px; text-shadow: 1px 1px 4px rgba(0,0,0,0.7); }
         #game-over-screen p, #start-screen p { font-size: 1.3em; margin-bottom: 35px; max-width: 85%; line-height: 1.5; }
-        .start-button, .restart-button { /* ... */
+        .start-button, .restart-button {
             padding: 14px 30px; font-size: 1.2em; cursor: pointer; background-color: var(--primary-accent);
             color: white; border: none; border-radius: 10px; transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
         .start-button:hover, .restart-button:hover { background-color: var(--primary-accent-dark); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.4); }
@@ -182,10 +187,10 @@
         #timer-text { font-size: 0.9em; font-weight: 600; color: var(--text-light); min-width: 65px; text-align: right; }
 
         /* Action Buttons */
-        .action-button { /* Only block button remains */
+        .action-button {
              width: 100%; padding: 12px; font-size: 1em; border-radius: 8px; color: white;
              border: none; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-             font-weight: 500; margin-top: 10px; /* Add margin since discover is gone */
+             font-weight: 500; margin-top: 10px;
         }
          .action-button i { margin-right: 8px; }
          .action-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
@@ -196,18 +201,18 @@
          #block-button.blocking { animation: pulse-red 1s infinite; }
           @keyframes pulse-red { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.03); } }
 
-        /* Animated Packet */
-        #animated-packet { /* Styling remains similar */ }
+        /* Animiertes Paket */
+        #animated-packet { /* Styling für das fliegende Paket */ }
          #animated-packet > svg { width: 18px; height: 18px; }
         #animated-packet.visible { opacity: 1; }
-        #animated-packet.blocked { /* Styling remains similar */ }
-        /* Removed discovered class */
+        #animated-packet.blocked { /* Styling wenn blockiert */ }
         @keyframes spin { from { transform: rotate(0deg) scale(1); } to { transform: rotate(360deg) scale(1); } }
 
     </style>
 </head>
 <body>
     <div id="game-container">
+        <!-- Linker Bereich: Router-Visualisierung und Ports -->
         <div id="router-area">
             <div id="router-visualization">IP ROUTER</div>
             <div id="ports-container"></div>
@@ -221,6 +226,8 @@
             </div>
              <div id="animated-packet"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"> <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /> </svg> </div>
         </div>
+
+        <!-- Rechter Bereich: Infos, Tabelle und Aktionen -->
         <div id="info-area">
             <div id="score-container">
                 <h3>Spielstand</h3>
@@ -238,6 +245,7 @@
             <button id="block-button" class="action-button" disabled><svg xmlns="http://www.w.org/2000/svg" class="h-4 w-4 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>Blockieren</button>
         </div>
 
+        <!-- Overlays -->
         <div id="start-screen">
             <h2>IP Router Spiel</h2>
             <p>Leite Pakete zum richtigen Port oder Gateway. Blockiere böse Pakete und erreiche den Highscore!</p>
@@ -266,7 +274,6 @@
         const finalScoreSpan = document.getElementById('final-score');
         const startButton = document.querySelector('.start-button');
         const restartButton = document.querySelector('.restart-button');
-        // discoverButton removed
         const blockButton = document.getElementById('block-button');
         const timerBar = document.getElementById('timer-bar');
         const timerText = document.getElementById('timer-text');
@@ -275,42 +282,41 @@
         const GATEWAY_PORT_NUMBER = 0;
         const MAX_COMBO = 5;
 
+        // --- Game State (Spielzustand) ---
         let gameState = {
             score: 0,
             highscore: localStorage.getItem('ipRouterHighscore') || 0,
             errors: 0,
             level: 1,
-            ports: 3, // Number of normal ports
-            packetInterval: 5000, // FASTER start interval
-            decisionTime: 8000, // FASTER start decision time
-            ipTable: new Map(), // Populated at start now
-            // portNetworkMap removed
+            ports: 3, // Startanzahl Ports
+            packetInterval: 5000, // Zeit zwischen Paketen (Startwert)
+            decisionTime: 8000, // Zeit zum Entscheiden (Startwert)
+            ipTable: new Map(), // Routing Tabelle: Netzwerk -> Port
             currentPacket: null,
             packetTimer: null,
             decisionTimerInterval: null,
             timeLeft: 0,
             gameActive: false,
-            errorTimestamp: [],
+            errorTimestamp: [], // Um Game Over bei zu vielen Fehlern in kurzer Zeit zu erkennen
             maxErrorsInWindow: 3,
             errorWindowTime: 20000,
-            badPacketChance: 0.3,
+            badPacketChance: 0.3, // Wahrscheinlichkeit für böse Pakete
             blockedIPs: new Set(),
             nextNetworkSuffix: 1,
             combo: 1,
         };
 
-        // --- Sound Synthesis --- (remains the same)
+        // --- Sound Synthesis (Tone.js) ---
         const synth = new Tone.Synth().toDestination();
         const metalSynth = new Tone.MetalSynth({ frequency: 150, envelope: { attack: 0.001, decay: 0.1, release: 0.1 }, harmonicity: 3.1, modulationIndex: 16, resonance: 2000, octaves: 0.5 }).toDestination();
         const noiseSynth = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.005, decay: 0.05, sustain: 0 } }).toDestination();
-        function playSound(type) { /* ... (same as before) ... */
+        function playSound(type) {
              try {
                 if (!Tone.context.state || Tone.context.state !== 'running') { Tone.start(); }
                 switch(type) {
                     case 'packet': synth.triggerAttackRelease("C4", "16n", Tone.now()); break;
                     case 'correct-port': synth.triggerAttackRelease("G4", "16n", Tone.now() + 0.01); break;
                     case 'correct-gw': synth.triggerAttackRelease("A4", "16n", Tone.now() + 0.01); break;
-                    // Removed 'correct-discover' sound
                     case 'correct-block': metalSynth.triggerAttackRelease("8n", Tone.now() + 0.01); break;
                     case 'error': noiseSynth.triggerAttackRelease("8n", Tone.now()); break;
                     case 'levelup': synth.triggerAttackRelease("C5", "8n", Tone.now()); synth.triggerAttackRelease("G5", "8n", Tone.now() + 0.15); break;
@@ -319,7 +325,7 @@
             } catch (error) { console.error("Tone.js error:", error); }
         }
 
-        // --- Utility Functions ---
+        // --- Hilfsfunktionen für IP-Logik ---
         function generateIPForNetwork(networkSuffix, hostPart) { return `192.168.${networkSuffix}.${hostPart}`; }
         function getNetworkFromIP(ip) {
              if (!ip || typeof ip !== 'string') return null;
@@ -331,106 +337,106 @@
         function generateRandomIP(forceExternal = false) {
              const type = Math.random();
              if (forceExternal || type < 0.5) { return `${Math.floor(Math.random() * 191) + 1}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 254) + 1}`; }
-             else { // Generate IP for an *existing* local network
+             else { // IP aus einem *existierenden* lokalen Netzwerk generieren
                  const knownNetworks = Array.from(gameState.ipTable.keys());
-                 if (knownNetworks.length === 0) return generateRandomIP(true); // Fallback if no networks yet
+                 if (knownNetworks.length === 0) return generateRandomIP(true);
                  const targetNetwork = knownNetworks[Math.floor(Math.random() * knownNetworks.length)];
                  const networkSuffix = parseInt(targetNetwork.split('.')[2]);
                  return generateIPForNetwork(networkSuffix, Math.floor(Math.random() * 254) + 1);
              }
         }
-        function updateScore(points) { /* ... (no change) ... */
+
+        // --- Spielmechanik (Punkte, Level, Combo) ---
+        function updateScore(points) {
             const pointsToAdd = points * gameState.combo;
             gameState.score += pointsToAdd;
             scoreDisplay.textContent = `Punkte: ${gameState.score}`;
             if (gameState.score > gameState.highscore) { gameState.highscore = gameState.score; highscoreDisplay.textContent = `Highscore: ${gameState.highscore}`; localStorage.setItem('ipRouterHighscore', gameState.highscore); }
             if (gameState.score >= gameState.level * 100) { levelUp(); }
         }
-        function increaseCombo() { /* ... (no change) ... */
+        function increaseCombo() {
             gameState.combo = Math.min(MAX_COMBO, gameState.combo + 1);
             comboDisplay.textContent = `Combo: x${gameState.combo}`;
              if (gameState.combo > 1) playSound('combo');
         }
-        function resetCombo() { /* ... (no change) ... */
+        function resetCombo() {
             gameState.combo = 1; comboDisplay.textContent = `Combo: x${gameState.combo}`;
         }
-        function levelUp() { /* ... (Adjusted timing decrease) ... */
+        function levelUp() {
             playSound('levelup'); gameState.level++; levelDisplay.textContent = `Level: ${gameState.level}`;
             if (gameState.ports < 12 || (gameState.ports < 32 && gameState.level % 2 === 0)) { addPort(); }
-            // Faster decrease now
+            // Schwierigkeit erhöhen
             gameState.packetInterval = Math.max(1500, gameState.packetInterval - 400);
             gameState.decisionTime = Math.max(4000, gameState.decisionTime - 500);
-            gameState.badPacketChance = Math.min(0.4, gameState.badPacketChance + 0.90); // Faster increase
+            gameState.badPacketChance = Math.min(0.4, gameState.badPacketChance + 0.90);
             if (gameState.level % 2 === 0) { const newBlocked = generateRandomIP(true); gameState.blockedIPs.add(newBlocked); console.log("New blocked IP:", newBlocked); }
             clearTimeout(gameState.packetTimer); if(gameState.gameActive) { gameState.packetTimer = setTimeout(generatePacket, gameState.packetInterval); }
             console.log(`Level Up! Ports: ${gameState.ports}, Interval: ${gameState.packetInterval}, Decision Time: ${gameState.decisionTime}, Bad Packet Chance: ${gameState.badPacketChance.toFixed(2)}`);
         }
-        function addPort() { // Now adds port AND updates routing table immediately
+        function addPort() {
             gameState.ports++;
             const newPortNumber = gameState.ports;
             const newNetwork = `192.168.${gameState.nextNetworkSuffix}.0/24`;
-            gameState.ipTable.set(newNetwork, newPortNumber); // Add route immediately
+            gameState.ipTable.set(newNetwork, newPortNumber);
             gameState.nextNetworkSuffix++;
             createPorts();
-            updateIpTableDisplay(); // Update table display
+            updateIpTableDisplay();
         }
-        // discoverNetwork function removed
-        function handleError() { /* ... (no change) ... */
+
+        function handleError() {
             playSound('error'); resetCombo(); gameState.errors++; errorCountSpan.textContent = gameState.errors;
             updateScore(-15); const now = Date.now(); gameState.errorTimestamp.push(now);
             gameState.errorTimestamp = gameState.errorTimestamp.filter(ts => now - ts < gameState.errorWindowTime);
             if (gameState.errorTimestamp.length >= gameState.maxErrorsInWindow) { gameOver(); }
         }
-        function startDecisionTimer() { /* ... (no change) ... */
+        function startDecisionTimer() {
              clearInterval(gameState.decisionTimerInterval); gameState.timeLeft = gameState.decisionTime; updateTimerBar();
              gameState.decisionTimerInterval = setInterval(() => {
                  gameState.timeLeft -= 100; updateTimerBar();
                  if (gameState.timeLeft <= 0) {
-                     clearInterval(gameState.decisionTimerInterval); if (gameState.currentPacket) { console.log("Time ran out!"); handleError(); clearIncomingPacket(true); clearTimeout(gameState.packetTimer); gameState.packetTimer = setTimeout(generatePacket, 1000); }
+                     clearInterval(gameState.decisionTimerInterval); if (gameState.currentPacket) { console.log("Zeit abgelaufen!"); handleError(); clearIncomingPacket(true); clearTimeout(gameState.packetTimer); gameState.packetTimer = setTimeout(generatePacket, 1000); }
                  }
              }, 100);
         }
-        function updateTimerBar() { /* ... (no change) ... */
+        function updateTimerBar() {
              const percentage = Math.max(0, (gameState.timeLeft / gameState.decisionTime) * 100); timerBar.style.width = `${percentage}%`; timerText.textContent = `${(Math.max(0, gameState.timeLeft) / 1000).toFixed(1)}s`;
              timerBar.classList.remove('low', 'medium'); if (percentage < 30) { timerBar.classList.add('low'); } else if (percentage < 60) { timerBar.classList.add('medium'); }
         }
-        function updateIpTableDisplay() { /* ... (no change) ... */
+        function updateIpTableDisplay() {
              ipTableBody.innerHTML = ''; const gwRow = ipTableBody.insertRow(); gwRow.insertCell(0).textContent = '0.0.0.0/0 (Default)'; gwRow.insertCell(1).textContent = `GW Port`;
              gameState.ipTable.forEach((port, network) => { const row = ipTableBody.insertRow(); row.insertCell(0).textContent = network; row.insertCell(1).textContent = `Port ${port}`; });
         }
 
-        // --- Packet Handling ---
+        // --- Paket-Logik ---
         function generatePacket() {
              if (!gameState.gameActive) return;
             clearIncomingPacket();
             playSound('packet');
             const incomingPort = Math.floor(Math.random() * gameState.ports) + 1;
-            const srcIP = generateRandomIP(); // Generate source IP
-            let destIP = generateRandomIP(); // Generate potential destination IP
-            let packetType = 'external'; // Assume external initially
+            const srcIP = generateRandomIP();
+            let destIP = generateRandomIP();
+            let packetType = 'external';
             let targetPort = GATEWAY_PORT_NUMBER;
             let isBadPacket = false;
             let destNetwork = getNetworkFromIP(destIP);
 
-            // 1. Check if source IP is blocked
+            // 1. Prüfen ob Source IP blockiert ist
             if (gameState.blockedIPs.has(srcIP) && Math.random() < gameState.badPacketChance) {
                 isBadPacket = true;
                 packetType = 'bad';
-                targetPort = null; // Target is the block button
+                targetPort = null; // Ziel ist Blockieren
             } else {
-                // 2. Check destination network
+                // 2. Prüfen des Ziel-Netzwerks
                 if (destNetwork === 'external') {
-                    packetType = 'external'; // Keep as external
+                    packetType = 'external';
                     targetPort = GATEWAY_PORT_NUMBER;
-                } else { // It's a local-like network (192.168.x.x)
-                    // Check if this specific network is in our routing table
+                } else { // Lokales Netzwerk (192.168.x.x)
                     if (gameState.ipTable.has(destNetwork)) {
-                        packetType = 'normal'; // Known local network
+                        packetType = 'normal'; // Bekanntes lokales Netz
                         targetPort = gameState.ipTable.get(destNetwork);
                     } else {
-                        // This case should ideally not happen often if generateRandomIP prefers existing networks
-                        // Treat as external if the specific local network isn't directly routable
-                        console.warn(`Packet generated for unknown local network ${destNetwork}, routing to gateway.`);
+                        // Unbekanntes lokales Netz -> Gateway
+                        console.warn(`Packet für unbekanntes lokales Netz ${destNetwork}, Routing zu Gateway.`);
                         packetType = 'external';
                         targetPort = GATEWAY_PORT_NUMBER;
                     }
@@ -441,17 +447,15 @@
             displayPacket(gameState.currentPacket);
             startDecisionTimer();
             blockButton.disabled = packetType !== 'bad';
-            // discoverButton removed
-            console.log("New Packet:", gameState.currentPacket);
+            console.log("Neues Paket:", gameState.currentPacket);
         }
 
-        function displayPacket(packet) { // Updated icons and types
+        function displayPacket(packet) {
             let icon = '❓'; let iconColorClass = ''; let typeText = '';
             switch (packet.type) {
                 case 'external': icon = '☁️'; iconColorClass = 'external'; typeText = ' (-> Gateway)'; break;
-                // Removed unknown-network
                 case 'bad': icon = '💀'; iconColorClass = 'bad'; typeText = ' (Böses Paket!)'; break;
-                case 'normal': icon = '💻'; break; // Known local
+                case 'normal': icon = '💻'; break;
             }
             incomingPacketDiv.innerHTML = `
                 <div class="packet-icon ${iconColorClass}">${icon}</div>
@@ -465,17 +469,16 @@
              clearInterval(gameState.decisionTimerInterval);
              gameState.currentPacket = null;
              blockButton.disabled = true;
-             // discoverButton removed
              timerBar.style.width = '0%';
              timerText.textContent = '-- s';
         }
 
-        // --- Player Interaction & Animation ---
-        function getElementCenter(element) { /* ... (no change) ... */
+        // --- Interaktion & Animation ---
+        function getElementCenter(element) {
             if (!element) return { x: 0, y: 0 }; const rect = element.getBoundingClientRect(); const containerRect = document.getElementById('router-area').getBoundingClientRect(); return { x: rect.left - containerRect.left + rect.width / 2, y: rect.top - containerRect.top + rect.height / 2 }; }
-        function animatePacketTo(targetElement, packetType = 'normal') { /* ... (no change) ... */
+        function animatePacketTo(targetElement, packetType = 'normal') {
             return new Promise(resolve => { const startPos = getElementCenter(incomingPacketDiv); const endPos = getElementCenter(targetElement); const packet = animatedPacket; packet.className = 'animated-packet'; packet.style.left = `${startPos.x - 17}px`; packet.style.top = `${startPos.y - 12}px`; packet.style.opacity = '0'; packet.style.transform = 'scale(0.5)'; requestAnimationFrame(() => { packet.classList.add('visible'); packet.style.transform = 'scale(1)'; setTimeout(() => { packet.style.left = `${endPos.x - 17}px`; packet.style.top = `${endPos.y - 12}px`; }, 10); }); setTimeout(() => { packet.style.opacity = '0'; packet.style.transform = 'scale(0.5)'; resolve(); }, 700); }); }
-        function animatePacketSpecial(type) { /* Removed 'discover' case */
+        function animatePacketSpecial(type) {
              return new Promise(resolve => { const startPos = getElementCenter(incomingPacketDiv); const packet = animatedPacket; packet.className = 'animated-packet'; packet.style.left = `${startPos.x - 17}px`; packet.style.top = `${startPos.y - 12}px`; packet.style.opacity = '0'; packet.style.transform = 'scale(0.5)'; requestAnimationFrame(() => { packet.classList.add('visible'); packet.style.transform = 'scale(1)'; if (type === 'block') { packet.classList.add('blocked'); } }); setTimeout(() => { packet.style.opacity = '0'; packet.style.transform = 'scale(0.5)'; packet.classList.remove('blocked'); resolve(); }, 700); }); }
 
         function handlePortClick(clickedPortNumber) {
@@ -484,7 +487,7 @@
             let correctAction = false;
             let targetPortElement = document.querySelector(`.port[data-port="${clickedPortNumber}"]`);
 
-            // Correct if packet is 'normal'/'external' and target matches click
+            // Korrekt, wenn Paket 'normal'/'external' ist UND Zielport übereinstimmt
             if ((packet.type === 'normal' && packet.targetPort === clickedPortNumber) ||
                 (packet.type === 'external' && clickedPortNumber === GATEWAY_PORT_NUMBER)) {
                  correctAction = true;
@@ -492,11 +495,8 @@
                  playSound(clickedPortNumber === GATEWAY_PORT_NUMBER ? 'correct-gw' : 'correct-port');
                  increaseCombo();
             }
-            // Incorrect if packet is bad or target doesn't match
             finalizeAction(correctAction, targetPortElement);
         }
-
-        // discoverButton listener removed
 
         blockButton.addEventListener('click', () => {
             if (!gameState.currentPacket || !gameState.gameActive || isAnimating) return;
@@ -504,52 +504,50 @@
              if (gameState.currentPacket.type === 'bad') {
                  console.log("Blocking bad packet from IP:", gameState.currentPacket.srcIP);
                  updateScore(20); playSound('correct-block'); increaseCombo(); correctAction = true;
-                 finalizeAction(correctAction, null, false, true); // Pass block flag
+                 finalizeAction(correctAction, null, false, true); // Block-Flag setzen
                  return;
              }
-             finalizeAction(false, null); // Incorrect block action
+             finalizeAction(false, null); // Falsche Aktion (unschuldiges Paket blockiert)
         });
 
         let isAnimating = false;
 
-        async function finalizeAction(isCorrect, portElement, isBroadcast = false, isBlock = false, isDiscover = false) { // isDiscover removed
+        async function finalizeAction(isCorrect, portElement, isBroadcast = false, isBlock = false, isDiscover = false) {
              if (isAnimating) return;
              isAnimating = true;
              clearInterval(gameState.decisionTimerInterval);
 
             if (isCorrect) {
-                console.log("Correct action!");
+                console.log("Richtige Aktion!");
                 if (portElement) { await animatePacketTo(portElement); portElement.classList.add('correct'); }
                 else if (isBlock) { await animatePacketSpecial('block'); blockButton.classList.add('blocking'); }
-                // Removed discover animation trigger
 
                 clearIncomingPacket();
                  clearTimeout(gameState.packetTimer);
-                 gameState.packetTimer = setTimeout(generatePacket, Math.max(800, gameState.packetInterval * 0.8)); // Faster next packet
+                 gameState.packetTimer = setTimeout(generatePacket, Math.max(800, gameState.packetInterval * 0.8)); // Schnelleres nächstes Paket
 
-            } else { // Incorrect Action
-                console.log("Incorrect action!");
+            } else { // Falsche Aktion
+                console.log("Falsche Aktion!");
                  incomingPacketDiv.parentElement.classList.add('shake-error');
                  if (portElement) { portElement.classList.add('incorrect'); }
                  handleError();
                  clearTimeout(gameState.packetTimer);
                  gameState.packetTimer = setTimeout(() => {
                      clearIncomingPacket(true);
-                     gameState.packetTimer = setTimeout(generatePacket, gameState.packetInterval); // Normal delay after error
+                     gameState.packetTimer = setTimeout(generatePacket, gameState.packetInterval); // Normale Verzögerung nach Fehler
                  }, 1500);
             }
 
              setTimeout(() => {
                  document.querySelectorAll('.port.correct, .port.incorrect').forEach(p => p.classList.remove('correct', 'incorrect'));
                  blockButton.classList.remove('blocking');
-                 // discoverButton removed
                  incomingPacketDiv.parentElement.classList.remove('shake-error');
                  isAnimating = false;
              }, 700);
         }
 
-        // --- Game Flow ---
-        function createPorts() { // Now displays pre-known network on port
+        // --- Spielablauf & Setup ---
+        function createPorts() {
              portsContainer.innerHTML = '';
             const normalPorts = gameState.ports;
             let columns = 4;
@@ -557,9 +555,9 @@
             portsContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
             for (let i = 1; i <= normalPorts; i++) {
                 const port = document.createElement('div'); port.classList.add('port');
-                // Find the network assigned to this port number in the ipTable
+                // Finde das Netzwerk, das diesem Port zugeordnet ist
                 const networkEntry = Array.from(gameState.ipTable.entries()).find(([net, p]) => p === i);
-                const displayNetwork = networkEntry ? networkEntry[0].split('/')[0] : 'FEHLER'; // Should always find one now
+                const displayNetwork = networkEntry ? networkEntry[0].split('/')[0] : 'FEHLER';
                 port.innerHTML = `<span class="port-number">P ${i}</span><span class="port-ip">${displayNetwork}</span>`;
                 port.dataset.port = i; port.addEventListener('click', () => handlePortClick(i)); portsContainer.appendChild(port);
             }
@@ -567,33 +565,32 @@
              gatewayPort.innerHTML = `<span class="port-number"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.09M10.5 8a2.5 2.5 0 012.41 2.083l.42 2.104a2.5 2.5 0 002.41 2.083H18.5a2.5 2.5 0 002.5-2.5v-1.293a2.5 2.5 0 00-.732-1.767l-2.06-1.716a2.5 2.5 0 00-1.767-.732H10.5z" /></svg> GW</span><span class="port-ip">Internet</span>`;
              gatewayPort.dataset.port = GATEWAY_PORT_NUMBER; gatewayPort.addEventListener('click', () => handlePortClick(GATEWAY_PORT_NUMBER)); portsContainer.appendChild(gatewayPort);
         }
-        function resetGameState() { // Fills ipTable at start
+        function resetGameState() {
              gameState.score = 0; gameState.errors = 0; gameState.level = 1; gameState.ports = 3;
-             gameState.packetInterval = 5000; // Faster start
-             gameState.decisionTime = 8000; // Faster start
-             gameState.ipTable.clear(); // Clear routing table
-             // portNetworkMap removed
+             gameState.packetInterval = 5000;
+             gameState.decisionTime = 8000;
+             gameState.ipTable.clear();
              gameState.currentPacket = null; gameState.errorTimestamp = []; gameState.badPacketChance = 0;
              gameState.blockedIPs.clear(); gameState.nextNetworkSuffix = 1; gameState.combo = 1;
              clearTimeout(gameState.packetTimer); clearInterval(gameState.decisionTimerInterval);
 
-             // Initialize starting networks AND add them to ipTable immediately
+             // Initiale Netzwerke erstellen und Routen hinzufügen
              for(let i = 1; i <= gameState.ports; i++) {
                  const network = `192.168.${gameState.nextNetworkSuffix}.0/24`;
-                 gameState.ipTable.set(network, i); // Add route directly
+                 gameState.ipTable.set(network, i);
                  gameState.nextNetworkSuffix++;
              }
              comboDisplay.textContent = `Combo: x${gameState.combo}`;
         }
-        function startGame() { /* ... (no change) ... */
-             console.log("Starting game..."); resetGameState(); gameState.gameActive = true;
+        function startGame() {
+             console.log("Spiel gestartet..."); resetGameState(); gameState.gameActive = true;
              startScreen.classList.add('hidden-overlay'); gameOverScreen.classList.add('hidden-overlay');
              scoreDisplay.textContent = `Punkte: ${gameState.score}`; highscoreDisplay.textContent = `Highscore: ${gameState.highscore}`;
              errorCountSpan.textContent = gameState.errors; levelDisplay.textContent = `Level: ${gameState.level}`;
              updateIpTableDisplay(); createPorts(); clearIncomingPacket();
-             gameState.packetTimer = setTimeout(generatePacket, 1500); // Shorter initial delay
+             gameState.packetTimer = setTimeout(generatePacket, 1500);
         }
-        function gameOver() { /* ... (no change) ... */
+        function gameOver() {
              console.log("Game Over!"); gameState.gameActive = false;
              clearTimeout(gameState.packetTimer); clearInterval(gameState.decisionTimerInterval);
              finalScoreSpan.textContent = gameState.score;
@@ -604,7 +601,7 @@
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
 
-        // --- Initial Setup ---
+        // --- Initiales Setup ---
         highscoreDisplay.textContent = `Highscore: ${gameState.highscore}`;
         gameOverScreen.classList.add('hidden-overlay');
         startScreen.classList.remove('hidden-overlay');

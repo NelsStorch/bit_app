@@ -1,3 +1,11 @@
+<!--
+  Datei: plan2.php
+  Beschreibung: Erweiterte Version des Netzwerk-Diagrammerstellers.
+  Bietet zusätzlich Undo/Redo-Funktionalität, Kontextmenüs (Rechtsklick)
+  und detaillierte Konfigurationsmöglichkeiten für Geräte (Hostname, IP) und Verbindungen (Typ).
+
+  Technologien: HTML5 Canvas, JavaScript, Tailwind CSS
+-->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -27,7 +35,7 @@
         .tooltip { position: absolute; background-color: #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; visibility: hidden; opacity: 0; transition: opacity 0.2s; z-index: 10000; pointer-events: none; }
         .message-overlay { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.75); color: white; padding: 10px 20px; border-radius: 8px; z-index: 10100; font-size: 14px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        /* Context Menu Styles */
+        /* Kontextmenü Styles */
         .context-menu { position: absolute; background-color: white; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); z-index: 1000; min-width: 150px; border-radius: 4px; padding: 4px 0; }
         .context-menu-item { padding: 8px 12px; cursor: pointer; font-size: 14px; }
         .context-menu-item:hover { background-color: #f0f0f0; }
@@ -47,6 +55,7 @@
 </head>
 <body class="bg-gray-100 flex flex-col h-screen">
 
+    <!-- Werkzeugleiste mit Undo/Redo Buttons -->
     <div class="bg-white shadow-md p-2 flex items-center space-x-1 print:hidden toolbar">
         <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufügen">
             <div class="device-icon">💻</div><span class="text-xs mt-1">PC</span>
@@ -75,14 +84,17 @@
         <button id="clearCanvas" class="button-std button-danger">Leeren</button>
     </div>
 
+    <!-- Zeichenfläche -->
     <div class="flex-grow p-2 relative" id="canvasContainer">
         <canvas id="networkCanvas"></canvas>
         <div id="messageOverlay" class="message-overlay"></div>
+        <!-- Kontextmenü Container -->
         <div id="contextMenu" class="context-menu" style="display: none;"></div>
     </div>
 
     <div id="tooltip" class="tooltip"></div>
 
+    <!-- Modal für Gerätekonfiguration -->
     <div id="deviceConfigModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="deviceConfigTitle">Gerätekonfiguration</h3>
@@ -101,6 +113,7 @@
         </div>
     </div>
 
+    <!-- Modal für Verbindungskonfiguration -->
     <div id="connectionConfigModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="connectionConfigTitle">Verbindungstyp</h3>
@@ -121,7 +134,7 @@
 
 
     <script>
-        // --- Global Variables and Constants ---
+        // --- Globale Variablen und Konstanten ---
         const canvas = document.getElementById('networkCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvasContainer');
@@ -136,6 +149,7 @@
         let nextDeviceId = 0;
         let nextPacketId = 0;
 
+        // Modi und Zustände
         let selectedDeviceType = null;
         let isConnecting = false;
         let firstDeviceForConnection = null;
@@ -146,9 +160,10 @@
         let dragOffsetX, dragOffsetY;
         let animationFrameId = null;
 
-        let currentConfiguringDevice = null; // For device config modal
-        let currentConfiguringConnection = null; // For connection config modal
+        let currentConfiguringDevice = null; // Für Geräte-Modal
+        let currentConfiguringConnection = null; // Für Verbindungs-Modal
 
+        // Undo/Redo Stacks
         const undoStack = [];
         const redoStack = [];
         const MAX_UNDO_STEPS = 30;
@@ -157,8 +172,8 @@
         const deviceProperties = {
             pc: { icon: '💻', baseWidth: 50, baseHeight: 50, color: '#60a5fa', label: 'PC', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.' },
             laptop: { icon: '🖥️', baseWidth: 50, baseHeight: 45, color: '#a78bfa', label: 'Laptop', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.' },
-            router: { icon: '🌐', baseWidth: 60, baseHeight: 60, color: '#34d399', label: 'Router', isForwarder: true, maxPorts: 2, defaultIpPrefix: '192.168.0.' }, // Different subnet for router example
-            switch: { icon: '↔️', baseWidth: 70, baseHeight: 40, color: '#fbbf24', label: 'Switch', isForwarder: true, maxPorts: 8, defaultIpPrefix: '192.168.1.' }, // Switch typically has many ports
+            router: { icon: '🌐', baseWidth: 60, baseHeight: 60, color: '#34d399', label: 'Router', isForwarder: true, maxPorts: 2, defaultIpPrefix: '192.168.0.' },
+            switch: { icon: '↔️', baseWidth: 70, baseHeight: 40, color: '#fbbf24', label: 'Switch', isForwarder: true, maxPorts: 8, defaultIpPrefix: '192.168.1.' },
             server: { icon: '🗄️', baseWidth: 60, baseHeight: 70, color: '#f59e0b', label: 'Server', isForwarder: false, maxPorts: 2, defaultIpPrefix: '10.0.0.' },
             internet: { icon: '☁️', baseWidth: 70, baseHeight: 50, color: '#93c5fd', label: 'Internet', isForwarder: true, maxPorts: Infinity, defaultIpPrefix: '203.0.113.' }
         };
@@ -174,13 +189,14 @@
         const packetSize = 5;
         const packetSpeed = 0.015;
         const packetProcessingTime = 45; // Frames
-        const connectionClickThreshold = 8; // Pixels for clicking on a line
+        const connectionClickThreshold = 8; // Pixel
 
         const tooltipElement = document.getElementById('tooltip');
 
-        // --- Undo/Redo ---
+        // --- Undo/Redo Logik ---
+
+        /** Speichert den aktuellen Zustand im Undo-Stack */
         function saveState() {
-            // Create a deep copy of the current state
             const state = {
                 devices: JSON.parse(JSON.stringify(devices)),
                 connections: JSON.parse(JSON.stringify(connections)),
@@ -195,6 +211,7 @@
             updateUndoRedoButtons();
         }
 
+        /** Stellt den letzten Zustand wieder her */
         function undo() {
             if (undoStack.length > 0) {
                 const currentState = { 
@@ -261,7 +278,7 @@
         }
 
 
-        // --- Tooltip and Message Functions ---
+        // --- Tooltip und Nachrichten ---
         function showTooltip(text, x, y) {
             tooltipElement.innerHTML = text; 
             tooltipElement.style.left = `${x + 15}px`;
@@ -281,7 +298,7 @@
             }, duration);
         }
 
-        // --- Canvas Resizing ---
+        // --- Canvas Zeichenfunktionen ---
         function resizeCanvas() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
@@ -289,7 +306,6 @@
         }
         window.addEventListener('resize', resizeCanvas);
 
-        // --- Drawing Functions ---
         function drawDevice(device) {
             ctx.font = `${deviceFontSize}px Arial`;
             const iconTextMetrics = ctx.measureText(device.icon);
@@ -303,7 +319,7 @@
             device.width = Math.max(deviceProperties[device.type].baseWidth, iconWidth + 10, labelWidth + 10);
             device.height = deviceProperties[device.type].baseHeight + labelFontSize + 8 + (portInfoFontSize + 4); 
 
-            // Draw device body
+            // Geräte-Körper
             ctx.fillStyle = deviceProperties[device.type].color;
             ctx.strokeStyle = '#374151';
             ctx.lineWidth = 1;
@@ -312,7 +328,7 @@
             ctx.fill();
             ctx.stroke();
 
-            // Draw device icon
+            // Icon
             const iconYOffset = -(labelFontSize / 2) - 2 - (portInfoFontSize / 2);
             ctx.font = `${deviceFontSize}px Arial`;
             ctx.fillStyle = '#000000';
@@ -320,13 +336,13 @@
             ctx.textBaseline = 'middle';
             ctx.fillText(device.icon, device.x, device.y + iconYOffset);
 
-            // Draw device hostname
+            // Hostname
             const hostnameYOffset = iconYOffset + (deviceFontSize / 2) + (labelFontSize / 2) + 4;
             ctx.font = `${labelFontSize}px Arial`;
             ctx.fillStyle = '#000000';
             ctx.fillText(hostname, device.x, device.y + hostnameYOffset);
             
-            // Draw port info
+            // Port Infos
             const props = deviceProperties[device.type];
             const currentConnections = getDeviceConnectionCount(device.id);
             const portText = `Ports: ${currentConnections}/${props.maxPorts === Infinity ? '∞' : props.maxPorts}`;
@@ -393,7 +409,7 @@
             }
         }
 
-        // --- Toolbar Button Event Handlers & Update ---
+        // --- Toolbar Button Event Handler ---
         document.getElementById('addPc').addEventListener('click', () => setDeviceType('pc'));
         document.getElementById('addLaptop').addEventListener('click', () => setDeviceType('laptop'));
         document.getElementById('addRouter').addEventListener('click', () => setDeviceType('router'));
@@ -442,7 +458,7 @@
             updateUndoRedoButtons();
         }
 
-        // --- Mode Setting Functions ---
+        // --- Modus-Funktionen ---
         function setDeviceType(type) {
             selectedDeviceType = type;
             isConnecting = false; isSendingPacketMode = false; isDeletingMode = false;
@@ -474,7 +490,7 @@
             updateToolbarButtons(); redrawCanvas();
         }
 
-        // --- Canvas Event Handlers (Click, Mouse, ContextMenu) ---
+        // --- Canvas Event Handler (Klick, Mausbewegung, Kontextmenü) ---
         canvas.addEventListener('click', (event) => {
             if (event.button !== 0) return; 
 
@@ -606,7 +622,7 @@
             }
         });
         
-        // --- Context Menu Logic ---
+        // --- Kontextmenü Logik ---
         canvas.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             const rect = canvas.getBoundingClientRect();
@@ -646,7 +662,7 @@
             const item = document.createElement('div');
             item.className = 'context-menu-item';
             item.textContent = label;
-            item.addEventListener('click', () => { // Corrected event listener
+            item.addEventListener('click', () => {
                 action();
                 hideContextMenu(); 
             });
@@ -662,7 +678,7 @@
             contextMenuElement.style.display = 'none';
         }
         document.addEventListener('click', (event) => {
-            if (!contextMenuElement.contains(event.target) && event.target !== canvas) { // Also hide if click is not on canvas
+            if (!contextMenuElement.contains(event.target) && event.target !== canvas) {
                  if(contextMenuElement.style.display === 'block'){
                     hideContextMenu();
                  }
@@ -685,7 +701,7 @@
         });
 
 
-        // --- Device and Connection Configuration Modals ---
+        // --- Modals für Konfiguration ---
         function openDeviceConfigModal(device) {
             currentConfiguringDevice = device;
             document.getElementById('deviceConfigTitle').textContent = `Konfig: ${device.hostname || deviceProperties[device.type].label + '-' + device.id}`;
@@ -729,7 +745,7 @@
         document.getElementById('cancelConnectionConfig').addEventListener('click', hideConnectionConfigModal);
 
 
-        // --- Core Logic Functions (Add, Delete, Connect, Packet) ---
+        // --- Kernfunktionen (Hinzufügen, Löschen, Verbinden, Paket) ---
         function addDevice(x, y, type) {
             saveState(); 
             const deviceData = deviceProperties[type];
@@ -857,9 +873,6 @@
         function getDeviceAt(x, y) {
             for (let i = devices.length - 1; i >= 0; i--) {
                 const device = devices[i];
-                // The problematic line was here and has been removed.
-                // device.width and device.height are calculated in drawDevice and should be available.
-                
                 const dWidth = device.width || deviceProperties[device.type].baseWidth; 
                 const dHeight = device.height || deviceProperties[device.type].baseHeight;
                 if (x >= device.x - dWidth / 2 && x <= device.x + dWidth / 2 &&
@@ -916,7 +929,7 @@
             redrawCanvas();
         }
 
-        // --- Pathfinding (BFS) and Packet Logic ---
+        // --- Pfadfindung (BFS) ---
         function getNeighbors(deviceId, allDevices, allConnections) {
             const neighbors = [];
             const deviceMap = new Map(allDevices.map(d => [d.id, d]));
@@ -1030,7 +1043,7 @@
             }
         }
 
-        // --- Animation Loop ---
+        // --- Animationsschleife ---
         function startAnimationLoop() {
             if (!animationFrameId) animatePackets();
         }
@@ -1050,7 +1063,7 @@
             }
         }
 
-        // --- Initial Setup ---
+        // --- Initialisierung ---
         resizeCanvas();
         updateToolbarButtons(); 
         console.log("Netzwerk-Diagrammersteller V3 initialisiert.");
