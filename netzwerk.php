@@ -1,3 +1,10 @@
+<!--
+  Datei: netzwerk.php
+  Beschreibung: Eine interaktive Schritt-für-Schritt Simulation eines Webseitenaufrufs.
+  Der Benutzer lernt die Abläufe von DNS, TCP, TLS und HTTP kennen.
+
+  Technologien: HTML5, Tailwind CSS, JavaScript (Animationen)
+-->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -142,7 +149,11 @@
 </head>
 <body class="flex flex-col h-screen">
 
-    <header class="p-3 bg-stadt-blue text-white flex items-center space-x-3 flex-shrink-0"> <svg class="w-7 h-7" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="white"> <path d="M50,5 L95,27.5 L95,72.5 L50,95 L5,72.5 L5,27.5 Z M50,15 L85,32.5 v35 L50,85 L15,67.5 v-35 Z M50,25 L75,37.5 v25 L50,75 L25,62.5 v-25 Z"/>
+    <header class="p-3 bg-stadt-blue text-white flex items-center space-x-3 flex-shrink-0 shadow-md">
+        <a href="index.html" class="hover:text-gray-200 transition-colors mr-2" title="Zurück zur Startseite">
+            <i class="fas fa-home text-xl"></i>
+        </a>
+        <svg class="w-7 h-7" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="white"> <path d="M50,5 L95,27.5 L95,72.5 L50,95 L5,72.5 L5,27.5 Z M50,15 L85,32.5 v35 L50,85 L15,67.5 v-35 Z M50,25 L75,37.5 v25 L50,75 L25,62.5 v-25 Z"/>
          </svg>
         <div>
             <h1 class="text-lg md:text-xl font-bold">BIT 2025 | Netzwerk</h1> <p class="text-xs opacity-90">Der Weg zu https://www.stadt-zuerich.ch/</p>
@@ -262,7 +273,11 @@
             };
         }
 
-        // Function to show/hide server action text
+        /**
+         * Zeigt einen Aktionstext über einem Knoten an.
+         * @param {string} nodeId - Die ID des Knotens.
+         * @param {string} text - Der anzuzeigende Text.
+         */
         function showActionText(nodeId, text) {
             clearTimeout(actionTextTimeout); // Clear previous timeout if any
             const nodePos = getNodeCenter(nodeId);
@@ -282,7 +297,16 @@
         }
 
 
-        // Function to animate a single packet movement
+        /**
+         * Animiert die Bewegung eines Pakets von einem Knoten zum anderen.
+         * @param {string} fromId - Start-Knoten ID.
+         * @param {string} toId - Ziel-Knoten ID.
+         * @param {number} duration - Dauer der Animation in ms.
+         * @param {string} type - Typ des Pakets ('request' oder 'response').
+         * @param {string} content - Textinhalt des Pakets.
+         * @param {string} actionText - Optionaler Text, der beim Start angezeigt wird.
+         * @returns {Promise} Ein Promise, das nach Abschluss der Animation aufgelöst wird.
+         */
         function animatePacket(fromId, toId, duration, type = 'request', content = '', actionText = '') {
             return new Promise(resolve => {
                 const startPos = getNodeCenter(fromId);

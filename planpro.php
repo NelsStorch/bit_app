@@ -54,6 +54,10 @@
 <body class="bg-gray-100 flex flex-col h-screen">
 
     <div class="bg-white shadow-md p-2 flex items-center space-x-1 print:hidden toolbar">
+        <a href="index.html" class="toolbar-item p-2 border rounded-lg flex flex-col items-center text-black no-underline" title="Zur Startseite">
+            <div class="device-icon">🏠</div><span class="text-xs mt-1">Home</span>
+        </a>
+        <div class="w-px h-10 bg-gray-300 mx-2"></div>
         <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufügen">
             <div class="device-icon">💻</div><span class="text-xs mt-1">PC</span>
         </div>
@@ -1203,7 +1207,6 @@
 
         // --- Initialisierung ---
         resizeCanvas(); updateToolbarButtons(); 
-        console.log("Netzwerk-Diagrammersteller V3 (Autom. Gateway) initialisiert.");
     </script>
 </body>
 </html>

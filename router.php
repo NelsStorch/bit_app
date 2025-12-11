@@ -211,6 +211,12 @@
     </style>
 </head>
 <body>
+    <a href="index.html" class="absolute top-4 left-4 text-white hover:text-gray-300 z-50 flex items-center gap-2 bg-gray-800 px-3 py-2 rounded-lg opacity-70 hover:opacity-100 transition-opacity no-underline" title="Zur Startseite">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        <span class="font-medium">Home</span>
+    </a>
     <div id="game-container">
         <!-- Linker Bereich: Router-Visualisierung und Ports -->
         <div id="router-area">
@@ -326,7 +332,20 @@
         }
 
         // --- Hilfsfunktionen für IP-Logik ---
+
+        /**
+         * Generiert eine IP-Adresse für ein bestimmtes Netzwerk.
+         * @param {number} networkSuffix - Das dritte Oktett der IP (192.168.X.0).
+         * @param {number} hostPart - Das vierte Oktett (Host).
+         * @returns {string} Die generierte IP-Adresse.
+         */
         function generateIPForNetwork(networkSuffix, hostPart) { return `192.168.${networkSuffix}.${hostPart}`; }
+
+        /**
+         * Bestimmt das Netzwerk (CIDR) aus einer IP-Adresse.
+         * @param {string} ip - Die zu prüfende IP-Adresse.
+         * @returns {string|null} Das Netzwerk (z.B. '192.168.1.0/24') oder 'external'.
+         */
         function getNetworkFromIP(ip) {
              if (!ip || typeof ip !== 'string') return null;
              const parts = ip.split('.');
@@ -369,9 +388,8 @@
             gameState.packetInterval = Math.max(1500, gameState.packetInterval - 400);
             gameState.decisionTime = Math.max(4000, gameState.decisionTime - 500);
             gameState.badPacketChance = Math.min(0.4, gameState.badPacketChance + 0.90);
-            if (gameState.level % 2 === 0) { const newBlocked = generateRandomIP(true); gameState.blockedIPs.add(newBlocked); console.log("New blocked IP:", newBlocked); }
+            if (gameState.level % 2 === 0) { const newBlocked = generateRandomIP(true); gameState.blockedIPs.add(newBlocked); }
             clearTimeout(gameState.packetTimer); if(gameState.gameActive) { gameState.packetTimer = setTimeout(generatePacket, gameState.packetInterval); }
-            console.log(`Level Up! Ports: ${gameState.ports}, Interval: ${gameState.packetInterval}, Decision Time: ${gameState.decisionTime}, Bad Packet Chance: ${gameState.badPacketChance.toFixed(2)}`);
         }
         function addPort() {
             gameState.ports++;
@@ -394,7 +412,7 @@
              gameState.decisionTimerInterval = setInterval(() => {
                  gameState.timeLeft -= 100; updateTimerBar();
                  if (gameState.timeLeft <= 0) {
-                     clearInterval(gameState.decisionTimerInterval); if (gameState.currentPacket) { console.log("Zeit abgelaufen!"); handleError(); clearIncomingPacket(true); clearTimeout(gameState.packetTimer); gameState.packetTimer = setTimeout(generatePacket, 1000); }
+                     clearInterval(gameState.decisionTimerInterval); if (gameState.currentPacket) { handleError(); clearIncomingPacket(true); clearTimeout(gameState.packetTimer); gameState.packetTimer = setTimeout(generatePacket, 1000); }
                  }
              }, 100);
         }
@@ -408,6 +426,12 @@
         }
 
         // --- Paket-Logik ---
+
+        /**
+         * Generiert ein neues Spiel-Paket.
+         * Erstellt zufällige Quell- und Ziel-IPs und bestimmt den korrekten Zielport.
+         * Kann auch "böse" Pakete generieren, die blockiert werden müssen.
+         */
         function generatePacket() {
              if (!gameState.gameActive) return;
             clearIncomingPacket();
@@ -447,7 +471,6 @@
             displayPacket(gameState.currentPacket);
             startDecisionTimer();
             blockButton.disabled = packetType !== 'bad';
-            console.log("Neues Paket:", gameState.currentPacket);
         }
 
         function displayPacket(packet) {
@@ -502,7 +525,6 @@
             if (!gameState.currentPacket || !gameState.gameActive || isAnimating) return;
             let correctAction = false;
              if (gameState.currentPacket.type === 'bad') {
-                 console.log("Blocking bad packet from IP:", gameState.currentPacket.srcIP);
                  updateScore(20); playSound('correct-block'); increaseCombo(); correctAction = true;
                  finalizeAction(correctAction, null, false, true); // Block-Flag setzen
                  return;
@@ -518,7 +540,6 @@
              clearInterval(gameState.decisionTimerInterval);
 
             if (isCorrect) {
-                console.log("Richtige Aktion!");
                 if (portElement) { await animatePacketTo(portElement); portElement.classList.add('correct'); }
                 else if (isBlock) { await animatePacketSpecial('block'); blockButton.classList.add('blocking'); }
 
@@ -527,7 +548,6 @@
                  gameState.packetTimer = setTimeout(generatePacket, Math.max(800, gameState.packetInterval * 0.8)); // Schnelleres nächstes Paket
 
             } else { // Falsche Aktion
-                console.log("Falsche Aktion!");
                  incomingPacketDiv.parentElement.classList.add('shake-error');
                  if (portElement) { portElement.classList.add('incorrect'); }
                  handleError();
@@ -583,7 +603,7 @@
              comboDisplay.textContent = `Combo: x${gameState.combo}`;
         }
         function startGame() {
-             console.log("Spiel gestartet..."); resetGameState(); gameState.gameActive = true;
+             resetGameState(); gameState.gameActive = true;
              startScreen.classList.add('hidden-overlay'); gameOverScreen.classList.add('hidden-overlay');
              scoreDisplay.textContent = `Punkte: ${gameState.score}`; highscoreDisplay.textContent = `Highscore: ${gameState.highscore}`;
              errorCountSpan.textContent = gameState.errors; levelDisplay.textContent = `Level: ${gameState.level}`;
@@ -591,7 +611,7 @@
              gameState.packetTimer = setTimeout(generatePacket, 1500);
         }
         function gameOver() {
-             console.log("Game Over!"); gameState.gameActive = false;
+             gameState.gameActive = false;
              clearTimeout(gameState.packetTimer); clearInterval(gameState.decisionTimerInterval);
              finalScoreSpan.textContent = gameState.score;
              gameOverScreen.classList.remove('hidden-overlay'); startScreen.classList.add('hidden-overlay');
