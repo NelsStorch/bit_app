@@ -255,7 +255,19 @@
         <div id="start-screen">
             <h2>IP Router Spiel</h2>
             <p>Leite Pakete zum richtigen Port oder Gateway. Blockiere böse Pakete und erreiche den Highscore!</p>
+
+            <div class="mb-4">
+                <input type="text" id="player-name-input" placeholder="Dein Name" class="p-3 rounded text-gray-800 font-bold text-center" maxlength="15">
+            </div>
+
             <button class="start-button">Spiel starten</button>
+
+            <div id="leaderboard" class="mt-8 bg-gray-800 bg-opacity-70 p-4 rounded-lg w-full max-w-md">
+                <h3 class="text-xl font-bold mb-2 text-blue-400">Top 10 Highscores</h3>
+                <ul id="highscore-list" class="text-left text-sm space-y-1">
+                    <li class="text-center italic text-gray-400">Lade Highscores...</li>
+                </ul>
+            </div>
         </div>
         <div id="game-over-screen" class="hidden-overlay">
             <h2>Game Over!</h2>
@@ -614,17 +626,96 @@
              gameState.gameActive = false;
              clearTimeout(gameState.packetTimer); clearInterval(gameState.decisionTimerInterval);
              finalScoreSpan.textContent = gameState.score;
+
+             // Highscore speichern
+             const playerName = playerNameInput.value.trim();
+             if (playerName && gameState.score > 0) {
+                 saveHighscoreToDb(playerName, gameState.score);
+             }
+
              gameOverScreen.classList.remove('hidden-overlay'); startScreen.classList.add('hidden-overlay');
         }
 
+        // --- Highscore / Database Logic ---
+        const playerNameInput = document.getElementById('player-name-input');
+        const highscoreList = document.getElementById('highscore-list');
+
+        async function fetchHighscores() {
+            try {
+                const response = await fetch('save_highscore.php');
+                if (!response.ok) throw new Error('Netzwerk-Antwort war nicht ok');
+                const highscores = await response.json();
+                renderHighscores(highscores);
+            } catch (error) {
+                console.error('Fehler beim Laden der Highscores:', error);
+                highscoreList.innerHTML = '<li class="text-center text-red-400">Konnte Highscores nicht laden.</li>';
+            }
+        }
+
+        function renderHighscores(highscores) {
+            highscoreList.innerHTML = '';
+            if (highscores.length === 0) {
+                highscoreList.innerHTML = '<li class="text-center italic text-gray-400">Noch keine Highscores.</li>';
+                return;
+            }
+
+            highscores.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between border-b border-gray-600 pb-1 last:border-0';
+                li.innerHTML = `
+                    <span><span class="font-bold text-yellow-500 w-6 inline-block">${index + 1}.</span> ${escapeHtml(entry.player_name)}</span>
+                    <span class="font-mono text-blue-300">${entry.score}</span>
+                `;
+                highscoreList.appendChild(li);
+            });
+        }
+
+        async function saveHighscoreToDb(name, score) {
+            if (!name) return;
+            try {
+                const response = await fetch('save_highscore.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ player_name: name, score: score })
+                });
+                const result = await response.json();
+                console.log('Highscore gespeichert:', result);
+                fetchHighscores(); // Aktualisiere Liste
+            } catch (error) {
+                console.error('Fehler beim Speichern des Highscores:', error);
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return text;
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // --- Event Listeners ---
-        startButton.addEventListener('click', startGame);
+        startButton.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            if (!name) {
+                alert("Bitte gib deinen Namen ein!");
+                playerNameInput.focus();
+                return;
+            }
+            startGame();
+        });
+
         restartButton.addEventListener('click', startGame);
 
         // --- Initiales Setup ---
         highscoreDisplay.textContent = `Highscore: ${gameState.highscore}`;
         gameOverScreen.classList.add('hidden-overlay');
         startScreen.classList.remove('hidden-overlay');
+
+        // Lade Highscores beim Start
+        fetchHighscores();
 
     </script>
 </body>
