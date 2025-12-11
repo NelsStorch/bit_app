@@ -1,9 +1,17 @@
+<!--
+  Dateiname: bitstartseite.html
+  Beschreibung: Dies ist die Landing-Page für "BIT 2025 | Netzwerk - Zürich".
+  Sie bietet eine Übersicht und Links zu verschiedenen Netzwerk-Tools und Spielen.
+
+  Technologien: HTML5, Tailwind CSS, Particles.js
+-->
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BIT 2025 | Netzwerk - Zürich</title>
+    <!-- Tailwind CSS via CDN für schnelles Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -14,6 +22,7 @@
         .header-gradient {
             background: linear-gradient(90deg, #0077b6, #00b4d8); /* Blautöne, modern und professionell */
         }
+        /* Styling für die Link-Karten mit Hover-Effekten */
         .link-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
@@ -25,7 +34,7 @@
             background: linear-gradient(90deg, #023047, #005068);
         }
 
-        /* Animierte Hintergrundpartikel (optional, für einen dynamischeren Look) */
+        /* Container für Particles.js Canvas */
         #particles-js {
             position: absolute;
             width: 100%;
@@ -34,24 +43,29 @@
             left: 0;
             z-index: 0; /* Hinter dem Inhalt */
         }
+        /* Container für den eigentlichen Seiteninhalt, damit er über den Partikeln liegt */
         .content-container {
-            position: relative; /* Damit der Inhalt über den Partikeln liegt */
+            position: relative;
             z-index: 1;
         }
     </style>
 </head>
 <body class="antialiased text-gray-800">
 
+    <!-- Hintergrund-Animation Container -->
     <div id="particles-js"></div>
 
+    <!-- Hauptinhalt -->
     <div class="content-container min-h-screen flex flex-col">
 
+        <!-- Kopfzeile -->
         <header class="header-gradient text-white shadow-lg">
             <div class="container mx-auto px-6 py-10 text-center">
                 <h1 class="text-4xl md:text-5xl font-bold tracking-tight">BIT 2025 | Netzwerk</h1>
             </div>
         </header>
 
+        <!-- Hauptbereich mit Links -->
         <main class="flex-grow container mx-auto px-6 py-12">
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-semibold text-gray-700">Wichtige Links</h2>
@@ -59,7 +73,8 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
 
-                <a href="https://nelsstorch.ch/plan.php" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-blue-50">
+                <!-- Link zu plan.php (Basis Version) -->
+                <a href="plan.php" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-blue-50">
                     <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
                             <svg class="h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -68,11 +83,13 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold text-gray-800">Netzwerkplan erstellen</h3>
-                            <p class="text-gray-600 mt-1">nelsstorch.ch/plan.php</p>
+                            <p class="text-gray-600 mt-1">plan.php</p>
                         </div>
                     </div>
                 </a>
-                <a href="https://nelsstorch.ch/planpro.php" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-blue-50">
+
+                <!-- Link zu planpro.php (Pro Version) -->
+                <a href="planpro.php" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-blue-50">
                     <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
                             <svg class="h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -81,11 +98,13 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold text-gray-800">Netzwerkplan erstellen (Pro)</h3>
-                            <p class="text-gray-600 mt-1">nelsstorch.ch/planpro.php</p>
+                            <p class="text-gray-600 mt-1">planpro.php</p>
                         </div>
                     </div>
                 </a>
-                <a href="https://nelsstorch.ch/pc_zu_pc.pdf" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-green-50">
+
+                <!-- Link zur PDF Aufgabe -->
+                <a href="pc_zu_pc.pdf" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-green-50">
                     <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
                             <svg class="h-10 w-10 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -94,11 +113,12 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold text-gray-800">Aufgabe: PC zu PC verbinden</h3>
-                            <p class="text-gray-600 mt-1">nelsstorch.ch/pc_zu_pc.pdf</p>
+                            <p class="text-gray-600 mt-1">pc_zu_pc.pdf</p>
                         </div>
                     </div>
                 </a>
 
+                <!-- Link zu Kahoot -->
                 <a href="https://kahoot.it/" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-purple-50">
                     <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
@@ -114,7 +134,8 @@
                     </div>
                 </a>
 
-                <a href="https://nelsstorch.ch/router.php" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-yellow-50">
+                <!-- Link zum Router Spiel -->
+                <a href="router.php" target="_blank" rel="noopener noreferrer" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-yellow-50">
                      <div class="flex items-center space-x-4">
                         <div class="flex-shrink-0">
                             <svg class="h-10 w-10 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -123,7 +144,7 @@
                         </div>
                         <div>
                             <h3 class="text-xl font-semibold text-gray-800">Router Spiel: Pakete zuweisen</h3>
-                            <p class="text-gray-600 mt-1">nelsstorch.ch/router.php</p>
+                            <p class="text-gray-600 mt-1">router.php</p>
                         </div>
                     </div>
                 </a>
@@ -137,10 +158,13 @@
         </footer>
     </div>
 
+    <!-- Einbindung von Particles.js -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // particles.js Konfiguration (optional)
-        // Nur laden, wenn das Element #particles-js existiert
+        /**
+         * particles.js Konfiguration
+         * Erstellt einen animierten Hintergrund mit verbundenen Punkten (Netzwerk-Look).
+         */
         if (document.getElementById('particles-js')) {
             particlesJS("particles-js", {
                 "particles": {
@@ -152,10 +176,10 @@
                         }
                     },
                     "color": {
-                        "value": "#ffffff" // Farbe der Partikel (hier weiß für Kontrast zum Gradient)
+                        "value": "#ffffff" // Farbe der Partikel (Weiss)
                     },
                     "shape": {
-                        "type": "circle", // Form der Partikel
+                        "type": "circle", // Form
                         "stroke": {
                             "width": 0,
                             "color": "#000000"
@@ -165,7 +189,7 @@
                         }
                     },
                     "opacity": {
-                        "value": 0.5, // Transparenz der Partikel
+                        "value": 0.5, // Transparenz
                         "random": false,
                         "anim": {
                             "enable": false,
@@ -175,7 +199,7 @@
                         }
                     },
                     "size": {
-                        "value": 3, // Größe der Partikel
+                        "value": 3, // Grösse
                         "random": true,
                         "anim": {
                             "enable": false,
@@ -186,14 +210,14 @@
                     },
                     "line_linked": {
                         "enable": true,
-                        "distance": 150, // Maximale Distanz für Linien zwischen Partikeln
-                        "color": "#ffffff", // Farbe der Linien
+                        "distance": 150, // Maximale Distanz für Verbindungslinien
+                        "color": "#ffffff",
                         "opacity": 0.4,
                         "width": 1
                     },
                     "move": {
                         "enable": true,
-                        "speed": 2, // Geschwindigkeit der Partikelbewegung
+                        "speed": 2, // Geschwindigkeit
                         "direction": "none",
                         "random": false,
                         "straight": false,
@@ -211,11 +235,11 @@
                     "events": {
                         "onhover": {
                             "enable": true,
-                            "mode": "grab" // Interaktionsmodus bei Hover (z.B. "grab", "repulse", "bubble")
+                            "mode": "grab" // Interaktion bei Maus-Hover (Linien greifen)
                         },
                         "onclick": {
                             "enable": true,
-                            "mode": "push" // Interaktionsmodus bei Klick (z.B. "push", "remove")
+                            "mode": "push" // Interaktion bei Klick (neue Partikel)
                         },
                         "resize": true
                     },
@@ -238,7 +262,7 @@
                             "duration": 0.4
                         },
                         "push": {
-                            "particles_nb": 4 // Anzahl der Partikel, die bei Klick hinzugefügt werden
+                            "particles_nb": 4
                         },
                         "remove": {
                             "particles_nb": 2

@@ -1,3 +1,11 @@
+<!--
+  Datei: planpro.php
+  Beschreibung: Die professionellste Version des Netzwerk-Diagrammerstellers.
+  Zusätzlich zu den Funktionen von plan2.php bietet diese Version eine IP-Routing-Logik.
+  Pakete werden nur weitergeleitet, wenn IP-Adressen, Subnetzmasken und Gateways korrekt konfiguriert sind.
+
+  Technologien: HTML5 Canvas, JavaScript (IP-Berechnung), Tailwind CSS
+-->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -125,7 +133,7 @@
     </div>
 
     <script>
-        // --- Global Variables and Constants ---
+        // --- Globale Variablen ---
         const canvas = document.getElementById('networkCanvas');
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.getElementById('canvasContainer');
@@ -184,7 +192,8 @@
 
         const tooltipElement = document.getElementById('tooltip');
 
-        // --- IP Address Utilities ---
+        // --- IP-Adressen Hilfsfunktionen ---
+        /** Wandelt IP-String in Integer um (für Bit-Operationen) */
         function ipToLong(ip) {
             if (!ip || typeof ip !== 'string') return 0;
             const parts = ip.split('.');
@@ -198,6 +207,7 @@
             return long >>> 0; 
         }
 
+        /** Berechnet Netzwerkadresse aus IP und Maske */
         function getNetworkAddress(ip, mask) {
             if (!ip || !mask) return null;
             const ipLong = ipToLong(ip);
@@ -206,11 +216,13 @@
             return longToIp((ipLong & maskLong) >>> 0);
         }
         
+        /** Wandelt Integer zurück in IP-String */
         function longToIp(long) {
             if (long < 0 || long > 0xFFFFFFFF) return null; 
             return `${(long >>> 24)}.${(long >> 16 & 0xFF)}.${(long >> 8 & 0xFF)}.${(long & 0xFF)}`;
         }
 
+        /** Prüft, ob zwei Geräte im selben Subnetz sind */
         function areInSameSubnet(device1, device2) {
             if (!device1 || !device2 || !device1.ipAddress || !device2.ipAddress || !device1.subnetMask || !device2.subnetMask) {
                 return false;
@@ -222,6 +234,7 @@
             return netAddr1 !== null && netAddr1 === netAddr2;
         }
         
+        /** Validiert das Format einer IP-Adresse */
         function isValidIp(ip) {
             if (!ip || typeof ip !== 'string') return false;
             const parts = ip.split('.');
@@ -291,7 +304,7 @@
             updateToolbarButtons();
         }
 
-        // --- Tooltip and Message Functions ---
+        // --- Tooltip und Nachrichten ---
         function showTooltip(text, x, y) {
             tooltipElement.innerHTML = text; 
             tooltipElement.style.left = `${x + 15}px`; tooltipElement.style.top = `${y + 15}px`;
@@ -305,14 +318,13 @@
             setTimeout(() => { messageOverlay.style.display = 'none'; }, duration);
         }
 
-        // --- Canvas Resizing ---
+        // --- Canvas Zeichenfunktionen ---
         function resizeCanvas() {
             canvas.width = canvasContainer.clientWidth; canvas.height = canvasContainer.clientHeight;
             redrawCanvas();
         }
         window.addEventListener('resize', resizeCanvas);
 
-        // --- Drawing Functions ---
         function drawDevice(device) {
             ctx.font = `${deviceFontSize}px Arial`;
             const iconTextMetrics = ctx.measureText(device.icon);
@@ -329,7 +341,7 @@
                 dynamicHeight += ipFontSize + 4; 
             }
             if (deviceProperties[device.type].hasGateway && device.gateway) {
-                dynamicHeight += ipFontSize + 4; // For Gateway display
+                dynamicHeight += ipFontSize + 4; // Für Gateway Anzeige
             }
             dynamicHeight += portInfoFontSize + 4; 
             device.height = dynamicHeight;
@@ -464,7 +476,7 @@
             updateUndoRedoButtons();
         }
 
-        // --- Mode Setting Functions ---
+        // --- Mode Funktionen ---
         function setDeviceType(type) {
             selectedDeviceType = type; isConnecting = false; isSendingPacketMode = false; isDeletingMode = false;
             packetSourceDevice = null; firstDeviceForConnection = null; hideContextMenu();
@@ -486,7 +498,7 @@
             updateToolbarButtons(); redrawCanvas();
         }
 
-        // --- Canvas Event Handlers ---
+        // --- Canvas Event Handler ---
         canvas.addEventListener('click', (event) => {
             if (event.button !== 0) return; 
             const rect = canvas.getBoundingClientRect();
@@ -594,7 +606,7 @@
             }
         });
         
-        // --- Context Menu Logic ---
+        // --- Kontextmenü Logik ---
         canvas.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             const rect = canvas.getBoundingClientRect();
@@ -649,7 +661,7 @@
             if (event.ctrlKey && event.key === 'y') { event.preventDefault(); redo(); }
         });
 
-        // --- Device and Connection Configuration Modals ---
+        // --- Geräte und Verbindungskonfiguration Modals ---
         function openDeviceConfigModal(device) {
             if (device.type === 'switch') return; 
             currentConfiguringDevice = device;
@@ -672,7 +684,7 @@
         document.getElementById('saveDeviceConfig').addEventListener('click', () => {
             if (currentConfiguringDevice) {
                 saveState(); 
-                const oldIp = currentConfiguringDevice.ipAddress; // Store old IP for router check
+                const oldIp = currentConfiguringDevice.ipAddress; // Alte IP speichern für Router-Check
                 currentConfiguringDevice.hostname = document.getElementById('deviceHostname').value.trim();
                 const newIp = document.getElementById('deviceIpAddress').value.trim();
                 const newMask = document.getElementById('deviceSubnetMask').value.trim();
@@ -695,14 +707,15 @@
                     currentConfiguringDevice.gatewayManuallySet = !!newGateway; 
                 }
                 
-                if (currentConfiguringDevice.type === 'router' && oldIp !== newIp) { // Router IP changed
+                // Wenn Router IP geändert wurde, müssen evtl. Gateways von anderen Geräten angepasst werden
+                if (currentConfiguringDevice.type === 'router' && oldIp !== newIp) {
                     devices.forEach(dev => {
                         if (deviceProperties[dev.type].hasGateway && dev.gateway === oldIp) {
-                           dev.gateway = null; // Invalidate old gateway
+                           dev.gateway = null; // Altes Gateway ungültig machen
                            dev.gatewayManuallySet = false;
                            attemptAutoSetGateway(dev, true); 
                         } else if (deviceProperties[dev.type].hasGateway) {
-                           attemptAutoSetGateway(dev, true); // Re-check for other devices too
+                           attemptAutoSetGateway(dev, true); // Andere Geräte auch prüfen
                         }
                     });
                 } else if (deviceProperties[currentConfiguringDevice.type].hasGateway) {
@@ -733,7 +746,7 @@
         });
         document.getElementById('cancelConnectionConfig').addEventListener('click', hideConnectionConfigModal);
 
-        // --- Core Logic Functions ---
+        // --- Kern-Funktionen ---
         function addDevice(x, y, type) {
             saveState(); 
             const deviceData = deviceProperties[type];
@@ -751,7 +764,7 @@
                 connectionsCount: 0 
             };
             if (type === 'router' && deviceData.defaultIpPrefix === '192.168.1.') {
-                newDevice.ipAddress = '192.168.1.1'; // Common default for a LAN router
+                newDevice.ipAddress = '192.168.1.1'; // Standard IP für Router
             }
             nextDeviceId++; devices.push(newDevice); 
             redrawCanvas();
@@ -762,7 +775,7 @@
                 (conn.fromDeviceId === deviceId || conn.toDeviceId === deviceId) ? count + 1 : count, 0);
         }
         
-        // --- Automatic Gateway Setting ---
+        // --- Automatisches Gateway Setzen ---
         function attemptAutoSetGateway(deviceToUpdate, forceCheck = false) {
             if (!deviceProperties[deviceToUpdate.type].hasGateway || deviceToUpdate.type === 'switch') {
                 return; 
@@ -778,10 +791,10 @@
                 return; 
             }
             
-            // If forced or current gateway is invalid (or was never set manually and might be improvable)
+            // Wenn forciert oder aktuelles Gateway ungültig ist
             if (forceCheck || !currentGatewayIsValid()) {
-                deviceToUpdate.gateway = null; // Clear potentially invalid or old auto-set gateway
-                deviceToUpdate.gatewayManuallySet = false; // Reset manual flag if we are re-evaluating
+                deviceToUpdate.gateway = null;
+                deviceToUpdate.gatewayManuallySet = false;
             }
 
 
@@ -799,7 +812,7 @@
                     } else if (connectedDevice.type === 'switch') {
                         const switchNeighbors = getNeighbors(connectedDevice.id, devices, connections);
                         for (const swNeighbor of switchNeighbors) {
-                            if (swNeighbor.id === deviceToUpdate.id) continue; // Don't consider itself via switch
+                            if (swNeighbor.id === deviceToUpdate.id) continue;
                             if (swNeighbor.type === 'router' && areInSameSubnet(deviceToUpdate, swNeighbor)) {
                                 potentialGatewayIp = swNeighbor.ipAddress;
                                 break; 
@@ -854,7 +867,7 @@
 
         function deleteDevice(deviceToDelete) {
             saveState(); 
-            const oldIp = deviceToDelete.ipAddress; // Store old IP if it was a router
+            const oldIp = deviceToDelete.ipAddress;
             devices = devices.filter(d => d.id !== deviceToDelete.id);
             connections = connections.filter(conn => conn.fromDeviceId !== deviceToDelete.id && conn.toDeviceId !== deviceToDelete.id);
             packets = packets.filter(p => !p.path.includes(deviceToDelete.id));
@@ -890,7 +903,7 @@
 
             const dev1 = devices.find(d => d.id === fromDevId);
             const dev2 = devices.find(d => d.id === toDevId);
-            if (dev1) attemptAutoSetGateway(dev1, true); // Force recheck as connection changed
+            if (dev1) attemptAutoSetGateway(dev1, true); // Force recheck
             if (dev2) attemptAutoSetGateway(dev2, true); // Force recheck
 
             showMessage(`Verbindung zw. ${dev1?.hostname || `Gerät ${dev1?.id}`} & ${dev2?.hostname || `Gerät ${dev2?.id}`} gelöscht.`, 2000);
@@ -986,13 +999,13 @@
             
             const dev1 = devices.find(d => d.id === fromId);
             const dev2 = devices.find(d => d.id === toId);
-            if (dev1) attemptAutoSetGateway(dev1, true); // Force recheck as network changed
+            if (dev1) attemptAutoSetGateway(dev1, true); // Force recheck
             if (dev2) attemptAutoSetGateway(dev2, true); // Force recheck
 
             redrawCanvas();
         }
 
-        // --- Pathfinding (BFS) with IP Logic ---
+        // --- Pfadfindung (BFS) mit IP-Routing-Logik ---
         function findPath(startNode, targetNode, allNodes, allLinks) {
             if (startNode.type === 'switch' || targetNode.type === 'switch') {
                 return { path: [], reason: "Start- oder Zielgerät ist ein Switch (Layer 2)." };
@@ -1035,18 +1048,17 @@
                         }
                     } else {
                         if (!currentDevice.gateway || !isValidIp(currentDevice.gateway)) {
-                            // No need to continue this path if gateway is missing for inter-subnet communication
-                            // The final error message will be generated if no other path is found.
+                            // Gateway fehlt für Kommunikation ausserhalb des Subnetzes
                             continue; 
                         }
-                        // Find the router that matches the gateway IP and is in the same subnet as currentDevice
+                        // Finde Router, der Gateway IP entspricht UND im gleichen Subnetz ist
                         const gatewayRouter = allNodes.find(d => d.type === 'router' && d.ipAddress === currentDevice.gateway && areInSameSubnet(currentDevice, d));
                         if (gatewayRouter && (!visitedPaths.has(gatewayRouter.id) || visitedPaths.get(gatewayRouter.id).length > currentArrPath.length + 1)) {
                             const newPathToGateway = [...currentArrPath, gatewayRouter.id];
                             visitedPaths.set(gatewayRouter.id, newPathToGateway);
                             queue.push({ deviceId: gatewayRouter.id, path: newPathToGateway });
                         } else if (!gatewayRouter) {
-                             // Configured gateway IP does not match any router on the local subnet.
+                             // Gateway nicht erreichbar
                              continue;
                         }
                     }
@@ -1056,12 +1068,12 @@
                     const neighbors = getNeighbors(currentDeviceId, allNodes, allLinks);
                     for (const neighbor of neighbors) {
                         if (currentArrPath.length > 1 && neighbor.id === currentArrPath[currentArrPath.length - 2]) {
-                            continue; // Avoid L2 loop by not going back to immediate previous hop on switch
+                            continue; // Nicht zurücksenden
                         }
-                        // Switch forwards if:
-                        // 1. Neighbor is the target AND target is in the same subnet as the original sender.
-                        // 2. Neighbor is another Switch (continue L2 broadcast/forwarding).
-                        // 3. Neighbor is a Router or Internet (potential exit from L2 segment).
+                        // Switch leitet weiter, wenn:
+                        // 1. Nachbar ist Ziel UND Ziel ist im gleichen Subnetz wie Sender
+                        // 2. Nachbar ist Switch
+                        // 3. Nachbar ist Router oder Internet
                         if ( (neighbor.id === targetNode.id && areInSameSubnet(originalSender, targetNode)) || 
                              neighbor.type === 'switch' || 
                              neighbor.type === 'router' || 
@@ -1081,15 +1093,9 @@
                          if (currentArrPath.length > 1 && neighbor.id === currentArrPath[currentArrPath.length - 2]) {
                             continue; 
                         }
-                        // Router can forward to any connected neighbor (switch, another router, end device on its subnet, internet)
-                        // More complex routing table logic would go here in a real simulation.
-                        // For now, we assume if it's connected, it's a potential next hop.
-                        // The areInSameSubnet check is crucial when the neighbor is the targetNode.
+                        // Router leitet an alle verbundenen weiter (vereinfacht)
                         if (neighbor.id === targetNode.id && !areInSameSubnet(currentDevice, targetNode)) {
-                            // If router is connected to target, but target is not in router's configured subnet, this is a misconfiguration
-                            // unless this router is acting as a simple bridge (not modeled here).
-                            // For simplicity, allow if directly connected, but this path might still fail if IPs don't align for target.
-                            // The final check is if targetNode is reached.
+                           // Wenn Router direkt verbunden ist aber Subnetz falsch, trotzdem versuchen (vereinfacht)
                         }
 
                         if (!visitedPaths.has(neighbor.id) || visitedPaths.get(neighbor.id).length > currentArrPath.length + 1) {
@@ -1102,7 +1108,7 @@
                 }
             }
 
-            // If queue is empty and target not found, generate reason for failure
+            // Fehlergrund generieren, wenn kein Pfad gefunden
             if (startNode.type !== 'switch' && !areInSameSubnet(startNode, targetNode) && (!startNode.gateway || !isValidIp(startNode.gateway))) {
                  return { path: [], reason: `"${startNode.hostname||startNode.id}" (${startNode.ipAddress}) benötigt ein (gültiges) Default Gateway, um das Subnetz von "${targetNode.hostname||targetNode.id}" (${targetNode.ipAddress}) zu erreichen. Bitte konfigurieren Sie ein Gateway für "${startNode.hostname||startNode.id}" (z.B. die IP eines Routers im Subnetz ${getNetworkAddress(startNode.ipAddress, startNode.subnetMask)}).` };
             }
@@ -1183,7 +1189,7 @@
             }
         }
 
-        // --- Animation Loop ---
+        // --- Animationsschleife ---
         function startAnimationLoop() { if (!animationFrameId) animatePackets(); }
         function stopAnimationLoop() { if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; } }
         function animatePackets() {
@@ -1195,7 +1201,7 @@
             }
         }
 
-        // --- Initial Setup ---
+        // --- Initialisierung ---
         resizeCanvas(); updateToolbarButtons(); 
         console.log("Netzwerk-Diagrammersteller V3 (Autom. Gateway) initialisiert.");
     </script>

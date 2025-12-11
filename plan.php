@@ -1,3 +1,11 @@
+<!--
+  Datei: plan.php
+  Beschreibung: Ein webbasiertes Tool zum Erstellen von einfachen Netzwerkdiagrammen.
+  Benutzer können Geräte (PC, Router, Switch, etc.) per Drag & Drop platzieren, verbinden
+  und Pakete senden, um den Datenfluss zu simulieren.
+
+  Technologien: HTML5 Canvas, JavaScript, Tailwind CSS
+-->
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -9,12 +17,12 @@
         body { font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
         .toolbar {
             display: flex;
-            flex-wrap: wrap; /* Allow wrapping for more items */
+            flex-wrap: wrap; /* Mehrzeilig erlauben */
         }
         .toolbar-item {
             cursor: pointer;
             transition: background-color 0.3s;
-            min-width: 80px; /* Ensure items have a minimum width */
+            min-width: 80px;
         }
         .toolbar-item:hover {
             background-color: #e0e0e0;
@@ -28,53 +36,31 @@
             background-color: #f9f9f9;
             display: block;
         }
+        /* Button-Styles */
         .button-std {
             padding: 0.5rem 1rem;
-            border-radius: 0.375rem; /* rounded-md */
-            font-weight: 500; /* medium */
+            border-radius: 0.375rem;
+            font-weight: 500;
             transition: background-color 0.2s, border-color 0.2s, color 0.2s;
             border: 1px solid transparent;
         }
-        .button-primary {
-            background-color: #3b82f6; /* bg-blue-500 */
-            color: white;
-        }
-        .button-primary:hover {
-            background-color: #2563eb; /* hover:bg-blue-600 */
-        }
-        .button-secondary {
-            background-color: #6b7280; /* bg-gray-500 */
-            color: white;
-        }
-        .button-secondary:hover {
-            background-color: #4b5563; /* hover:bg-gray-600 */
-        }
-        .button-success {
-            background-color: #10b981; /* bg-green-500 */
-            color: white;
-        }
-        .button-success:hover {
-            background-color: #059669; /* hover:bg-green-600 */
-        }
-        .button-danger {
-            background-color: #ef4444; /* bg-red-500 */
-            color: white;
-        }
-        .button-danger:hover {
-            background-color: #dc2626; /* hover:bg-red-600 */
-        }
-        .button-warning {
-            background-color: #f59e0b; /* bg-amber-500 */
-            color: white;
-        }
-        .button-warning:hover {
-            background-color: #d97706; /* bg-amber-600 */
-        }
+        .button-primary { background-color: #3b82f6; color: white; }
+        .button-primary:hover { background-color: #2563eb; }
+        .button-secondary { background-color: #6b7280; color: white; }
+        .button-secondary:hover { background-color: #4b5563; }
+        .button-success { background-color: #10b981; color: white; }
+        .button-success:hover { background-color: #059669; }
+        .button-danger { background-color: #ef4444; color: white; }
+        .button-danger:hover { background-color: #dc2626; }
+        .button-warning { background-color: #f59e0b; color: white; }
+        .button-warning:hover { background-color: #d97706; }
+
         .device-icon {
             font-size: 24px;
             text-align: center;
             line-height: 1;
         }
+        /* Tooltip für Geräte-Infos */
         .tooltip {
             position: absolute;
             background-color: #333;
@@ -85,8 +71,9 @@
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.2s;
-            z-index: 1000; /* Ensure tooltip is on top */
+            z-index: 1000;
         }
+        /* Overlay für Nachrichten/Fehler */
         .message-overlay {
             position: absolute;
             top: 20px;
@@ -106,6 +93,7 @@
 </head>
 <body class="bg-gray-100 flex flex-col h-screen">
 
+    <!-- Werkzeugleiste -->
     <div class="bg-white shadow-md p-2 flex items-center space-x-2 print:hidden toolbar">
         <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufügen">
             <div class="device-icon">💻</div>
@@ -137,6 +125,7 @@
         <button id="clearCanvas" class="button-std button-danger">Arbeitsfläche leeren</button>
     </div>
 
+    <!-- Zeichenfläche -->
     <div class="flex-grow p-2 relative" id="canvasContainer">
         <canvas id="networkCanvas"></canvas>
         <div id="messageOverlay" class="message-overlay"></div>
@@ -150,28 +139,35 @@
         const canvasContainer = document.getElementById('canvasContainer');
         const messageOverlay = document.getElementById('messageOverlay');
 
+        // --- Statusvariablen ---
         let devices = [];
         let connections = [];
         let packets = [];
         let nextDeviceId = 0;
         let nextPacketId = 0;
+
+        // Modi
         let selectedDeviceType = null;
         let isConnecting = false;
         let firstDeviceForConnection = null;
         let isSendingPacketMode = false;
         let packetSourceDevice = null;
-        let isDeletingMode = false; // New mode for deleting
+        let isDeletingMode = false;
+
+        // Drag & Drop
         let draggingDevice = null;
         let dragOffsetX, dragOffsetY;
+
+        // Animation
         let animationFrameId = null;
 
-        // Properties for each device type
+        // --- Konfiguration ---
         const deviceProperties = {
             pc: { icon: '💻', baseWidth: 50, baseHeight: 50, color: '#60a5fa', label: 'PC', isForwarder: false, maxPorts: 1 },
             laptop: { icon: '💻', baseWidth: 50, baseHeight: 45, color: '#a78bfa', label: 'Laptop', isForwarder: false, maxPorts: 1 },
             router: { icon: '🌐', baseWidth: 60, baseHeight: 60, color: '#34d399', label: 'Router', isForwarder: true, maxPorts: 2 },
             switch: { icon: '↔️', baseWidth: 70, baseHeight: 40, color: '#fbbf24', label: 'Switch', isForwarder: true, maxPorts: Infinity },
-            server: { icon: '🗄️', baseWidth: 60, baseHeight: 70, color: '#f59e0b', label: 'Server', isForwarder: false, maxPorts: Infinity }, // Server usually has one NIC, but can have more
+            server: { icon: '🗄️', baseWidth: 60, baseHeight: 70, color: '#f59e0b', label: 'Server', isForwarder: false, maxPorts: Infinity },
             internet: { icon: '☁️', baseWidth: 70, baseHeight: 50, color: '#93c5fd', label: 'Internet', isForwarder: true, maxPorts: Infinity }
         };
         const deviceFontSize = 16;
@@ -179,9 +175,11 @@
         const packetSize = 5;
         const packetSpeed = 0.015;
         const packetProcessingTime = 45; // Frames
-        const connectionClickThreshold = 5; // Pixels for clicking on a line
+        const connectionClickThreshold = 5; // Pixel
 
         const tooltipElement = document.getElementById('tooltip');
+
+        /** Zeigt einen Tooltip an der Mausposition */
         function showTooltip(text, x, y) {
             tooltipElement.textContent = text;
             tooltipElement.style.left = `${x + 15}px`;
@@ -194,6 +192,7 @@
             tooltipElement.style.opacity = '0';
         }
 
+        /** Zeigt eine temporäre Nachricht oben im Canvas an */
         function showMessage(message, duration = 3500) {
             messageOverlay.textContent = message;
             messageOverlay.style.display = 'block';
@@ -202,6 +201,7 @@
             }, duration);
         }
 
+        /** Passt die Canvas-Grösse an den Container an */
         function resizeCanvas() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
@@ -209,7 +209,9 @@
         }
         window.addEventListener('resize', resizeCanvas);
 
-        // --- Drawing Functions ---
+        // --- Zeichenfunktionen ---
+
+        /** Zeichnet ein Gerät auf dem Canvas */
         function drawDevice(device) {
             ctx.font = `${deviceFontSize}px Arial`;
             const iconTextMetrics = ctx.measureText(device.icon);
@@ -241,6 +243,7 @@
             ctx.fillText(labelText, device.x, device.y + (device.height / 2) - (labelFontSize / 2) - 4);
         }
 
+        /** Zeichnet eine Verbindungslinie zwischen zwei Geräten */
         function drawConnection(connection) {
             const fromDevice = devices.find(d => d.id === connection.fromDeviceId);
             const toDevice = devices.find(d => d.id === connection.toDeviceId);
@@ -254,6 +257,7 @@
             }
         }
 
+        /** Zeichnet ein Datenpaket */
         function drawPacket(packet) {
             ctx.beginPath();
             ctx.arc(packet.x, packet.y, packetSize, 0, 2 * Math.PI);
@@ -271,12 +275,14 @@
             }
         }
 
+        /** Aktualisiert das gesamte Canvas */
         function redrawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             connections.forEach(drawConnection);
             devices.forEach(drawDevice);
             packets.forEach(drawPacket);
 
+            // Visualisierung für Verbindungsmodus (Linie ziehen) oder Paketmodus (Quelle markieren)
             if (isConnecting && firstDeviceForConnection) {
                 ctx.beginPath();
                 ctx.arc(firstDeviceForConnection.x, firstDeviceForConnection.y, (firstDeviceForConnection.width || deviceProperties[firstDeviceForConnection.type].baseWidth) / 2 + 5, 0, 2 * Math.PI);
@@ -293,7 +299,7 @@
             }
         }
 
-        // --- Event Handlers for Toolbar Buttons ---
+        // --- Event Listener für Toolbar ---
         document.getElementById('addPc').addEventListener('click', () => setDeviceType('pc'));
         document.getElementById('addLaptop').addEventListener('click', () => setDeviceType('laptop'));
         document.getElementById('addRouter').addEventListener('click', () => setDeviceType('router'));
@@ -303,14 +309,14 @@
 
         document.getElementById('connectMode').addEventListener('click', toggleConnectMode);
         document.getElementById('packetSendMode').addEventListener('click', togglePacketSendMode);
-        document.getElementById('deleteMode').addEventListener('click', toggleDeleteMode); // New
+        document.getElementById('deleteMode').addEventListener('click', toggleDeleteMode);
         document.getElementById('clearCanvas').addEventListener('click', () => {
             if (confirm('Möchten Sie die Arbeitsfläche wirklich leeren? Alle Elemente gehen verloren.')) {
                 devices = []; connections = []; packets = [];
                 nextDeviceId = 0; nextPacketId = 0;
                 isConnecting = false; firstDeviceForConnection = null;
                 isSendingPacketMode = false; packetSourceDevice = null;
-                isDeletingMode = false; // Reset delete mode
+                isDeletingMode = false;
                 selectedDeviceType = null;
                 stopAnimationLoop();
                 updateToolbarButtons(); redrawCanvas();
@@ -322,7 +328,6 @@
             if (selectedDeviceType) {
                 let typeName = selectedDeviceType.charAt(0).toUpperCase() + selectedDeviceType.slice(1);
                 if (selectedDeviceType === 'pc') typeName = 'Pc';
-                // Ensure correct ID mapping for other types if needed, e.g. 'Laptop', 'Server'
                 document.getElementById(`add${typeName}`)?.classList.add('selected', 'border-blue-500');
             }
 
@@ -336,13 +341,13 @@
             isSendingPacketMode ? packetSendBtn.classList.add('button-success') : packetSendBtn.classList.remove('button-success');
             isSendingPacketMode ? packetSendBtn.classList.remove('button-secondary') : packetSendBtn.classList.add('button-secondary');
 
-            const deleteBtn = document.getElementById('deleteMode'); // New
+            const deleteBtn = document.getElementById('deleteMode');
             deleteBtn.textContent = isDeletingMode ? "Löschen (aktiv)" : "Löschen";
             isDeletingMode ? deleteBtn.classList.add('button-danger') : deleteBtn.classList.remove('button-danger');
             isDeletingMode ? deleteBtn.classList.remove('button-warning') : deleteBtn.classList.add('button-warning');
         }
 
-        // --- Mode Setting Functions ---
+        // --- Modus-Umschaltung ---
         function setDeviceType(type) {
             selectedDeviceType = type;
             isConnecting = false; isSendingPacketMode = false; isDeletingMode = false;
@@ -363,7 +368,7 @@
             if (!isSendingPacketMode) packetSourceDevice = null;
             updateToolbarButtons(); redrawCanvas();
         }
-        function toggleDeleteMode() { // New
+        function toggleDeleteMode() {
             isDeletingMode = !isDeletingMode;
             selectedDeviceType = null; isConnecting = false; isSendingPacketMode = false;
             firstDeviceForConnection = null; packetSourceDevice = null;
@@ -371,13 +376,13 @@
         }
 
 
-        // --- Canvas Event Handlers ---
+        // --- Canvas Event Handler ---
         canvas.addEventListener('click', (event) => {
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
-            if (isDeletingMode) { // Handle delete mode first
+            if (isDeletingMode) {
                 handleDeleteClick(x, y);
             } else if (selectedDeviceType) {
                 addDevice(x, y, selectedDeviceType);
@@ -390,7 +395,7 @@
         });
 
         canvas.addEventListener('mousedown', (event) => {
-            if (isConnecting || selectedDeviceType || isSendingPacketMode || isDeletingMode) return; // Don't drag in active modes
+            if (isConnecting || selectedDeviceType || isSendingPacketMode || isDeletingMode) return; // Kein Drag in aktiven Modi
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
@@ -424,7 +429,7 @@
                     if (mouseX >= device.x - dWidth / 2 && mouseX <= device.x + dWidth / 2 &&
                         mouseY >= device.y - dHeight / 2 && mouseY <= device.y + dHeight / 2) {
                         showTooltip(`${deviceProperties[device.type].label} ${device.id}`, event.clientX, event.clientY);
-                        canvas.style.cursor = isDeletingMode ? 'cell' : 'grab'; // Adjust cursor for delete mode
+                        canvas.style.cursor = isDeletingMode ? 'cell' : 'grab';
                         onDevice = true;
                         break;
                     }
@@ -471,7 +476,7 @@
             }
         });
 
-        // --- Core Logic Functions ---
+        // --- Logik-Funktionen ---
         function addDevice(x, y, type) {
             const deviceData = deviceProperties[type];
             if (!deviceData) return;
@@ -506,7 +511,7 @@
                     if (firstDeviceForConnection.id !== clickedDevice.id &&
                         !connectionExists(firstDeviceForConnection.id, clickedDevice.id)) {
                         
-                        // Check port limits
+                        // Port-Limits prüfen
                         const firstDeviceProps = deviceProperties[firstDeviceForConnection.type];
                         const clickedDeviceProps = deviceProperties[clickedDevice.type];
 
@@ -536,28 +541,25 @@
         function handleDeleteClick(x, y) {
             const clickedDevice = getDeviceAt(x, y);
             if (clickedDevice) {
-                // Remove device
+                // Gerät löschen
                 devices = devices.filter(d => d.id !== clickedDevice.id);
-                // Remove connections to this device
+                // Zugehörige Verbindungen löschen
                 const oldConnectionsCount = connections.length;
                 connections = connections.filter(conn => conn.fromDeviceId !== clickedDevice.id && conn.toDeviceId !== clickedDevice.id);
-                if (connections.length < oldConnectionsCount) {
-                     console.log(`Verbindungen für Gerät ${clickedDevice.id} entfernt.`);
-                }
-                // Remove packets related to this device
+                // Zugehörige Pakete löschen
                 packets = packets.filter(p => !p.path.includes(clickedDevice.id));
 
                 showMessage(`${deviceProperties[clickedDevice.type].label} ${clickedDevice.id} und zugehörige Verbindungen/Pakete gelöscht.`, 2000);
 
             } else {
-                // Try to delete a connection if no device was clicked
+                // Verbindung löschen, falls kein Gerät geklickt wurde
                 const clickedConnection = getConnectionAt(x, y);
                 if (clickedConnection) {
                     connections = connections.filter(conn =>
                         !( (conn.fromDeviceId === clickedConnection.fromDeviceId && conn.toDeviceId === clickedConnection.toDeviceId) ||
                            (conn.fromDeviceId === clickedConnection.toDeviceId && conn.toDeviceId === clickedConnection.fromDeviceId) )
                     );
-                     // Remove packets currently on this segment
+                     // Pakete auf diesem Segment löschen
                     packets = packets.filter(packet => {
                         const sourceId = packet.path[packet.pathIndex];
                         const nextHopId = packet.path[packet.pathIndex + 1];
@@ -615,14 +617,13 @@
             for (let i = packets.length - 1; i >= 0; i--) {
                 const packet = packets[i];
                 const distanceSquared = (x - packet.x) * (x - packet.x) + (y - packet.y) * (y - packet.y);
-                if (distanceSquared <= (packetSize * packetSize * 1.5 * 1.5) ) { // Increased click radius for packets
+                if (distanceSquared <= (packetSize * packetSize * 1.5 * 1.5) ) {
                     return packet;
                 }
             }
             return null;
         }
         
-        // New function to find a connection at a given point (x,y)
         function getConnectionAt(clickX, clickY) {
             for (const conn of connections) {
                 const fromDevice = devices.find(d => d.id === conn.fromDeviceId);
@@ -634,16 +635,16 @@
                 const x2 = toDevice.x;
                 const y2 = toDevice.y;
 
-                // Distance from point (clickX, clickY) to line segment (x1,y1)-(x2,y2)
+                // Abstand Punkt zu Linie
                 const lenSq = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-                if (lenSq === 0) { // Start and end points are the same
+                if (lenSq === 0) { // Start und Ende sind gleich
                      const distToPointSq = (clickX - x1) * (clickX - x1) + (clickY - y1) * (clickY - y1);
                      if (Math.sqrt(distToPointSq) < connectionClickThreshold) return conn;
                      continue;
                 }
 
                 let t = ((clickX - x1) * (x2 - x1) + (clickY - y1) * (y2 - y1)) / lenSq;
-                t = Math.max(0, Math.min(1, t)); // Clamp t to the segment
+                t = Math.max(0, Math.min(1, t));
 
                 const closestX = x1 + t * (x2 - x1);
                 const closestY = y1 + t * (y2 - y1);
@@ -670,7 +671,7 @@
             redrawCanvas();
         }
 
-        // --- Pathfinding (BFS) and Packet Logic ---
+        // --- Pfadfindung (BFS) ---
         function getNeighbors(deviceId, allDevices, allConnections) {
             const neighbors = [];
             const deviceMap = new Map(allDevices.map(d => [d.id, d]));
@@ -716,6 +717,7 @@
                         if (!visitedPaths.has(neighborDevice.id)) { 
                             let canHopToNeighbor = true;
 
+                            // Einfache Regeln für Internet/Router Verbindung
                             if (currentDevice.type === 'internet' && neighborDevice.type !== 'router') {
                                 canHopToNeighbor = false;
                             }
@@ -779,7 +781,7 @@
                 const currentSegmentNextHopDevice = devices.find(d => d.id === packet.path[packet.pathIndex + 1]);
 
                 if (!currentSegmentSourceDevice || !currentSegmentNextHopDevice) {
-                    console.warn(`Paket ${packet.id} hat ungültiges Segment (Gerät nicht gefunden oder Verbindung gelöscht), wird entfernt.`);
+                    console.warn(`Paket ${packet.id} hat ungültiges Segment, wird entfernt.`);
                     packets.splice(i, 1);
                     continue;
                 }
@@ -814,7 +816,7 @@
             }
         }
 
-        // --- Animation Loop ---
+        // --- Animationsschleife ---
         function startAnimationLoop() {
             if (!animationFrameId) {
                 animatePackets();
@@ -829,19 +831,19 @@
         function animatePackets() {
             updatePackets();
             redrawCanvas();
-            // Keep animation running if there are packets OR if any mode is active that might require redraws (like selection highlights)
+            // Animation läuft weiter, solange Pakete da sind oder Interaktion stattfindet
             if (packets.length > 0 || isConnecting || isSendingPacketMode || isDeletingMode || selectedDeviceType) {
                 animationFrameId = requestAnimationFrame(animatePackets);
             } else {
                 animationFrameId = null;
-                console.log("Keine aktiven Pakete oder UI-Aktionen, Animationsloop gestoppt.");
+                console.log("Animation gestoppt (Idle).");
             }
         }
 
-        // --- Initial Setup ---
+        // --- Initialisierung ---
         resizeCanvas();
         updateToolbarButtons();
-        console.log("Netzwerk-Diagrammersteller mit erweiterten Funktionen initialisiert.");
+        console.log("Netzwerk-Diagrammersteller initialisiert.");
     </script>
 </body>
 </html>

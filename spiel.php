@@ -1,11 +1,26 @@
 <?php
+/**
+ * Datei: spiel.php
+ * Beschreibung: Hauptlogik für das Spiel "Geheime Rolle Xtreme".
+ * Dieses Skript handhabt die gesamte Spiellogik, einschliesslich Zustandsverwaltung (State Management) via Session,
+ * Rollenverteilung, Spielphasen und Benutzeroberfläche.
+ *
+ * Das Spiel ist ein Party-Spiel ähnlich wie "Spyfall" oder "Werwolf",
+ * bei dem Spieler geheime Rollen und Wörter erhalten.
+ */
+
 session_start();
 
 // --- Globale Konfiguration & Wortliste ---
 $spielName = "Geheime Rolle Xtreme (Zufallsstart & Coole Wörter)";
 $spielerAnzahlOptionen = [3, 4, 5, 6, 7, 8];
 
-// "Coolere" Wortpaare: [Hauptwort, Ähnliches Wort]
+/**
+ * Liste von Wortpaaren für das Spiel.
+ * Struktur: [Hauptwort, Ähnliches Wort]
+ * Das "Hauptwort" bekommen die "Normalos", das "Ähnliche Wort" bekommen die "Undercover"-Spieler.
+ * "Mr. White" bekommt gar kein Wort.
+ */
 $wortPaare = [
     ["Meme", "GIF"],
     ["Influencer", "YouTuber"],
@@ -35,27 +50,46 @@ $wortPaare = [
 ];
 
 
-// --- Phasen des Spiels ---
-// 'setup_spieleranzahl' -> 'setup_namen' -> (Funktion: init_new_game_or_round) ->
-// 'rollen_ansehen_zwischenschritt' -> 'rollen_anzeigen' ->
-// 'hinweisrunde_info' -> 'abstimmung_verbal' ->
-// ('mr_white_guesst') -> 'zwischen_aufloesung' -> (Loop zu hinweisrunde_info ODER zu endgueltige_aufloesung)
-// -> 'endgueltige_aufloesung'
+// --- Phasen des Spiels (Dokumentation) ---
+// Das Spiel durchläuft folgende Phasen (State Machine in $_SESSION['game_phase']):
+// 1. 'setup_spieleranzahl': Auswahl der Spieleranzahl.
+// 2. 'setup_namen': Eingabe der Spielernamen.
+// 3. 'rollen_ansehen_zwischenschritt': "Pass the Device" - Aufforderung, das Gerät weiterzugeben.
+// 4. 'rollen_anzeigen': Anzeige der geheimen Rolle für den aktuellen Spieler.
+// 5. 'hinweisrunde_info': Informationsbildschirm für die Diskussionsrunde.
+// 6. 'abstimmung_verbal': Abstimmung, wer eliminiert werden soll.
+// 7. 'mr_white_guesst': Spezialphase, falls Mr. White eliminiert wird (er darf raten).
+// 8. 'zwischen_aufloesung': Anzeige des Ergebnisses einer Rauswahl.
+// 9. 'endgueltige_aufloesung': Spielende und Siegerehrung.
 
+// Aktuelle Aktion abrufen (GET oder POST)
 $action = $_POST['action'] ?? ($_GET['action'] ?? null);
 
-// --- Kernfunktion zum Starten/Initialisieren eines komplett neuen Spiels oder einer neuen Runde innerhalb eines Spiels ---
+/**
+ * Initialisiert ein neues Spiel oder eine neue Runde.
+ *
+ * Diese Funktion setzt die Session-Variablen zurück, wählt ein zufälliges Wortpaar,
+ * verteilt die Rollen (Mr. White, Undercover, Normalo, Mister Meme) zufällig an die Spieler
+ * und setzt den Spielstatus auf den Anfang.
+ *
+ * @param bool $is_new_full_game Wenn true, werden alle Spielerdaten gelöscht (komplett neues Spiel).
+ * @param bool $keep_players Wenn true, werden die Spielernamen behalten (neue Runde mit gleichen Spielern).
+ * @return bool Gibt true zurück, wenn die Initialisierung erfolgreich war, sonst false.
+ */
 function init_new_game_or_round($is_new_full_game = true, $keep_players = false) {
     global $wortPaare, $spielerAnzahlOptionen; // Zugriff auf globale Variablen
 
+    // Fall: Komplett neues Spiel (Spieler müssen neu eingegeben werden)
     if ($is_new_full_game && !$keep_players) {
         unset($_SESSION['spieler_daten'], $_SESSION['original_namen'], $_SESSION['anzahl_spieler']);
         $_SESSION['game_phase'] = 'setup_spieleranzahl';
         return true;
     }
 
+    // Fall: Spielerdaten verarbeiten oder prüfen
     if (!$keep_players || !isset($_SESSION['original_namen'])) {
         if (isset($_POST['spieler_name']) && isset($_SESSION['anzahl_spieler'])) {
+            // Namen aus Formular übernehmen
             $namen = $_POST['spieler_name'];
             if (count($namen) != $_SESSION['anzahl_spieler']) { $_SESSION['error_message'] = "Anzahl Namen passt nicht."; return false; }
             foreach ($namen as $name) { if (empty(trim($name))) { $_SESSION['error_message'] = "Namen dürfen nicht leer sein."; return false; }}
@@ -63,6 +97,7 @@ function init_new_game_or_round($is_new_full_game = true, $keep_players = false)
         } else if (!$is_new_full_game && isset($_SESSION['original_namen'])) {
             // Namen sind für Folgerunde schon da
         } else {
+            // Keine Namen vorhanden -> zurück zum Setup
             $_SESSION['game_phase'] = 'setup_spieleranzahl'; return false;
         }
     }
@@ -71,19 +106,24 @@ function init_new_game_or_round($is_new_full_game = true, $keep_players = false)
     $anzahl_spieler_fuer_runde = count($namen_fuer_runde);
     $_SESSION['anzahl_spieler'] = $anzahl_spieler_fuer_runde;
 
+    // Wortpaar auswählen
     $aktuelles_wortpaar = $wortPaare[array_rand($wortPaare)];
     $_SESSION['haupt_wort'] = $aktuelles_wortpaar[0];
     $_SESSION['aehnliches_wort'] = $aktuelles_wortpaar[1];
 
+    // Indizes mischen für zufällige Rollenverteilung
     $spielerIndizes = range(0, $anzahl_spieler_fuer_runde - 1);
     shuffle($spielerIndizes);
 
     $tempSpielerDaten = [];
+
+    // Bestimmen, wie viele Undercover-Spieler dabei sind
     $num_undercover = 0;
     if ($anzahl_spieler_fuer_runde >= 6) $num_undercover = 2;
     elseif ($anzahl_spieler_fuer_runde >= 3) $num_undercover = 1;
 
-    if ($anzahl_spieler_fuer_runde >= 1) { // Mr. White
+    // Rollen zuweisen
+    if ($anzahl_spieler_fuer_runde >= 1) { // Mr. White zuweisen
         $mrWhiteOriginalIndex = array_pop($spielerIndizes);
         $tempSpielerDaten[$mrWhiteOriginalIndex] = [
             'name' => $namen_fuer_runde[$mrWhiteOriginalIndex], 'angezeigte_rolle' => 'Mr. White',
@@ -91,7 +131,7 @@ function init_new_game_or_round($is_new_full_game = true, $keep_players = false)
             'id' => 'spieler_' . $mrWhiteOriginalIndex, 'nebenrolle' => null, 'aktiv' => true
         ];
     }
-    for ($i = 0; $i < $num_undercover; $i++) { // Undercover(s)
+    for ($i = 0; $i < $num_undercover; $i++) { // Undercover(s) zuweisen
         if (!empty($spielerIndizes)) {
             $undercoverOriginalIndex = array_pop($spielerIndizes);
             $tempSpielerDaten[$undercoverOriginalIndex] = [
@@ -101,7 +141,7 @@ function init_new_game_or_round($is_new_full_game = true, $keep_players = false)
             ];
         }
     }
-    foreach ($spielerIndizes as $normaloOriginalIndex) { // Normalos
+    foreach ($spielerIndizes as $normaloOriginalIndex) { // Normalos zuweisen
         $tempSpielerDaten[$normaloOriginalIndex] = [
             'name' => $namen_fuer_runde[$normaloOriginalIndex], 'angezeigte_rolle' => 'Normalo',
             'tatsaechliche_rolle' => 'Normalo', 'wort' => $_SESSION['haupt_wort'],
@@ -109,10 +149,12 @@ function init_new_game_or_round($is_new_full_game = true, $keep_players = false)
         ];
     }
     
+    // Nach Index sortieren, damit die Reihenfolge der Eingabe entspricht
     ksort($tempSpielerDaten);
     $_SESSION['spieler_daten'] = array_values($tempSpielerDaten);
     
-    if ($anzahl_spieler_fuer_runde >= 2) { // Mister Meme Zuweisung
+    // Zusatzrolle "Mister Meme" (optionaler Spaßfaktor)
+    if ($anzahl_spieler_fuer_runde >= 2) {
         $potentialMemePlayersIndices = [];
         foreach($_SESSION['spieler_daten'] as $idx => $spieler) {
             if ($spieler['tatsaechliche_rolle'] != 'Mr. White') { $potentialMemePlayersIndices[] = $idx; }
@@ -123,15 +165,19 @@ function init_new_game_or_round($is_new_full_game = true, $keep_players = false)
         }
     }
 
+    // Status-Flags zurücksetzen
     foreach($_SESSION['spieler_daten'] as $key => $spieler) { $_SESSION['spieler_daten'][$key]['hat_gesehen'] = false; }
 
     $_SESSION['aktueller_spieler_index_ansicht'] = 0;
     $_SESSION['game_phase'] = 'rollen_ansehen_zwischenschritt';
+    // Aufräumen von alten Session-Daten
     unset($_SESSION['letzter_rausgewaehlter_spieler_id'], $_SESSION['mr_white_guess_word'], $_SESSION['mr_white_guessed_correctly'], $_SESSION['error_message'], $_SESSION['spiel_gewinner_nachricht'], $_SESSION['aktueller_runden_start_spieler_name']);
     return true;
 }
 
-// Funktion zum Setzen des Startspielers für die Hinweisrunde
+/**
+ * Wählt zufällig einen Startspieler für die Hinweisrunde aus den noch aktiven Spielern.
+ */
 function set_random_hinweis_start_spieler() {
     $aktiveSpielerNamen = [];
     if (isset($_SESSION['spieler_daten'])) {
@@ -148,19 +194,22 @@ function set_random_hinweis_start_spieler() {
     }
 }
 
-// --- Aktionen verarbeiten ---
+// --- Aktionen verarbeiten (Controller-Logik) ---
 
+// 1. Reset Full Game
 if ($action == 'reset_full_game') {
     session_destroy(); session_start(); init_new_game_or_round(true, false);
     header("Location: spiel.php"); exit;
 }
 
+// 2. Nächste Runde mit gleichen Spielern
 if ($action == 'next_full_game_same_players') {
     if (isset($_SESSION['original_namen'])) { init_new_game_or_round(false, true); }
     else { $_SESSION['game_phase'] = 'setup_spieleranzahl'; }
     header("Location: spiel.php"); exit;
 }
 
+// 3. Spieleranzahl setzen
 if ($action == 'set_spieleranzahl' && isset($_POST['anzahl_spieler'])) {
     $anzahl = (int)$_POST['anzahl_spieler'];
     if (in_array($anzahl, $spielerAnzahlOptionen)) {
@@ -169,15 +218,18 @@ if ($action == 'set_spieleranzahl' && isset($_POST['anzahl_spieler'])) {
     header("Location: spiel.php"); exit;
 }
 
+// 4. Initiales Spiel mit Namen starten
 if ($action == 'start_initial_game_with_names') {
     if(!init_new_game_or_round(false, false)) { $_SESSION['game_phase'] = 'setup_namen'; }
     header("Location: spiel.php"); exit;
 }
 
+// 5. Rolle gesehen bestätigen
 if ($action == 'rolle_gesehen' && isset($_POST['spieler_index_gesehen'])) {
     $spielerIndex = (int)$_POST['spieler_index_gesehen'];
     if (isset($_SESSION['spieler_daten'][$spielerIndex])) { $_SESSION['spieler_daten'][$spielerIndex]['hat_gesehen'] = true; }
 
+    // Prüfen, ob alle ihre Rolle gesehen haben
     $alleGesehen = true; $naechsterIndex = -1;
     for ($i = 0; $i < count($_SESSION['spieler_daten']); $i++) {
         if ($_SESSION['spieler_daten'][$i]['aktiv'] && !$_SESSION['spieler_daten'][$i]['hat_gesehen']) {
@@ -195,11 +247,13 @@ if ($action == 'rolle_gesehen' && isset($_POST['spieler_index_gesehen'])) {
     header("Location: spiel.php"); exit;
 }
 
+// 6. Zur verbalen Abstimmung gehen
 if ($action == 'start_abstimmung_verbal') {
     $_SESSION['game_phase'] = 'abstimmung_verbal';
     header("Location: spiel.php"); exit;
 }
 
+// 7. Ergebnis der verbalen Abstimmung verarbeiten (Spieler rauswählen)
 if ($action == 'submit_verbal_vote' && isset($_POST['voted_player_id'])) {
     $votedPlayerId = $_POST['voted_player_id'];
     $_SESSION['letzter_rausgewaehlter_spieler_id'] = $votedPlayerId;
@@ -213,21 +267,29 @@ if ($action == 'submit_verbal_vote' && isset($_POST['voted_player_id'])) {
     }
 
     if ($votedPlayerIndex !== -1) {
-        $_SESSION['spieler_daten'][$votedPlayerIndex]['aktiv'] = false;
-        if ($votedPlayerTatsaechlicheRolle == 'Mr. White') { $_SESSION['game_phase'] = 'mr_white_guesst'; }
-        else { $_SESSION['game_phase'] = 'zwischen_aufloesung'; }
-    } else { $_SESSION['game_phase'] = 'abstimmung_verbal';}
+        $_SESSION['spieler_daten'][$votedPlayerIndex]['aktiv'] = false; // Spieler deaktivieren
+        if ($votedPlayerTatsaechlicheRolle == 'Mr. White') {
+            $_SESSION['game_phase'] = 'mr_white_guesst'; // Spezialphase für Mr. White
+        } else {
+            $_SESSION['game_phase'] = 'zwischen_aufloesung'; // Normale Zwischenauflösung
+        }
+    } else {
+        $_SESSION['game_phase'] = 'abstimmung_verbal';
+    }
     header("Location: spiel.php"); exit;
 }
 
+// 8. Mr. White Rateversuch verarbeiten
 if ($action == 'submit_mr_white_guess' && isset($_POST['word_guess'])) {
     $guess = trim($_POST['word_guess']);
     $_SESSION['mr_white_guess_word'] = $guess;
+    // Prüfen ob das Wort korrekt ist (case-insensitive)
     $_SESSION['mr_white_guessed_correctly'] = (isset($_SESSION['haupt_wort']) && strtolower($guess) == strtolower(trim($_SESSION['haupt_wort'])));
     $_SESSION['game_phase'] = 'zwischen_aufloesung';
     header("Location: spiel.php"); exit;
 }
 
+// 9. Weiter nach Zwischenauflösung (Prüfung auf Spielende)
 if ($action == 'continue_after_partial_reveal') {
     $aktiveSpieler = array_filter($_SESSION['spieler_daten'], function($p){ return $p['aktiv']; });
     $aktiveSpielerAnzahl = count($aktiveSpieler);
@@ -237,7 +299,7 @@ if ($action == 'continue_after_partial_reveal') {
     }
     
     $letzterRausgewaehlter = null; $letzterRausgewaehlterRolle = null;
-    if (isset($_SESSION['letzter_rausgewaehlter_spieler_id'])) { // Sicherstellen, dass es gesetzt ist
+    if (isset($_SESSION['letzter_rausgewaehlter_spieler_id'])) {
         foreach($_SESSION['spieler_daten'] as $p) {
             if ($p['id'] == $_SESSION['letzter_rausgewaehlter_spieler_id']) {
                 $letzterRausgewaehlter = $p; $letzterRausgewaehlterRolle = $p['tatsaechliche_rolle']; break;
@@ -245,8 +307,8 @@ if ($action == 'continue_after_partial_reveal') {
         }
     }
 
-
     $spielZuEnde = false;
+    // Gewinnbedingungen prüfen
     if ($letzterRausgewaehlterRolle == 'Mr. White') { // Mr. White wurde in dieser Runde rausgewählt
         if (isset($_SESSION['mr_white_guessed_correctly']) && $_SESSION['mr_white_guessed_correctly']) {
             $_SESSION['spiel_gewinner_nachricht'] = "Mr. White (".htmlspecialchars($letzterRausgewaehlter['name']).") wurde erwischt, ABER hat das Hauptwort korrekt erraten! <strong>Mr. White gewinnt!</strong>";
@@ -256,13 +318,13 @@ if ($action == 'continue_after_partial_reveal') {
             $spielZuEnde = true;
         }
     } else { // Ein Unschuldiger wurde rausgewählt
-        if (!$mrWhiteAktiv) { // Mr. White war der zuvor rausgewählte (und hat damals falsch geraten, sonst wäre Spiel vorbei) -> Normalos gewinnen
+        if (!$mrWhiteAktiv) { // Mr. White war schon vorher raus -> Normalos gewinnen (sollte durch Logik oben abgefangen sein, aber zur Sicherheit)
             $_SESSION['spiel_gewinner_nachricht'] = "Mr. White wurde bereits eliminiert! <strong>Die Normalos & Undercover gewinnen!</strong>";
             $spielZuEnde = true;
-        } elseif ($aktiveSpielerAnzahl <= 2 && $mrWhiteAktiv) { 
+        } elseif ($aktiveSpielerAnzahl <= 2 && $mrWhiteAktiv) { // Nur noch Mr. White und 1 anderer
             $_SESSION['spiel_gewinner_nachricht'] = "Nur noch ".htmlspecialchars($mrWhiteSpieler['name'] ?? 'Mr. White')." und ein weiterer Spieler sind übrig! <strong>Mr. White gewinnt durch Überleben!</strong>";
             $spielZuEnde = true;
-        } elseif ($aktiveSpielerAnzahl < 2 && !$mrWhiteAktiv){ // Alle raus außer Mr White, der aber schon raus ist
+        } elseif ($aktiveSpielerAnzahl < 2 && !$mrWhiteAktiv){
              $_SESSION['spiel_gewinner_nachricht'] = "Alle Spieler wurden eliminiert! Das ist...seltsam. Unentschieden?";
              $spielZuEnde = true;
         }
@@ -296,6 +358,7 @@ $aktiveSpielerFuerAnzeige = isset($_SESSION['spieler_daten']) ? array_filter($_S
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* CSS-Variablen für konsistentes Styling */
         :root {
             --primary-color: #0d6efd; --secondary-color: #6c757d; --success-color: #198754;
             --danger-color: #dc3545; --warning-color: #ffc107; --info-color: #0dcaf0;
@@ -597,7 +660,8 @@ $aktiveSpielerFuerAnzeige = isset($_SESSION['spieler_daten']) ? array_filter($_S
             </div>
         <?php endif; ?>
 
-        <?php if (!in_array($current_phase, ['setup_spieleranzahl', 'endgueltige_aufloesung', 'setup_namen']) && isset($_SESSION['original_namen'])): ?>
+        <?php // Reset-Button auf allen Seiten außer Startseite und Endseite
+        if (!in_array($current_phase, ['setup_spieleranzahl', 'endgueltige_aufloesung', 'setup_namen']) && isset($_SESSION['original_namen'])): ?>
             <hr class="separator">
             <form method="POST">
                 <input type="hidden" name="action" value="reset_full_game">
@@ -607,4 +671,3 @@ $aktiveSpielerFuerAnzeige = isset($_SESSION['spieler_daten']) ? array_filter($_S
     </div>
 </body>
 </html>
-
