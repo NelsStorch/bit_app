@@ -1,0 +1,80 @@
+uploads/
+desktop.ini
+# ---------------------------------
+# Dependencies
+# ---------------------------------
+**/node_modules/
+**/.pnpm-store/
+
+# ---------------------------------
+# Build Outputs & Generated Files
+# ---------------------------------
+**/dist/
+**/build/
+**/out/
+**/coverage/
+**/.vite/
+**/.next/
+**/tmp/
+
+# ---------------------------------
+# Environment Variables & Secrets (CRITICAL)
+# ---------------------------------
+.env
+
+
+# PostgreSQL Passwort Datei
+pgadmin/pgpass
+
+# ---------------------------------
+# Logs
+# ---------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# ---------------------------------
+# Python (cevi_qr_code & scripts)
+# ---------------------------------
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+**/.venv/
+**/venv/
+**/env/
+.pytest_cache/
+
+# ---------------------------------
+# IDE & System Files
+# ---------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---------------------------------
+# Docker
+# ---------------------------------
+docker-compose.override.yml
+
+# ---------------------------------
+# Testing
+# ---------------------------------
+/coverage
+/.nyc_output
+
+# ---------------------------------
+# Specific Backup Files
+# ---------------------------------
+*.bak
+*.old
+*.tmp
