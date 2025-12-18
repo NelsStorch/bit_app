@@ -2,10 +2,10 @@
 // save_highscore.php
 
 // Database configuration
-$host = 'localhost';
-$dbname = 'router_game';
-$username = 'root';
-$password = '';
+$host = getenv('DB_HOST') ?: 'localhost';
+$dbname = getenv('DB_NAME') ?: 'router_game';
+$username = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
 
 // Create connection
 try {
