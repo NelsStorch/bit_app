@@ -4,4 +4,4 @@ FROM php:8.2-apache
 RUN docker-php-ext-install pdo pdo_mysql
 
 # Copy application source
-COPY . /var/www/html/
+COPY public/ /var/www/html/
