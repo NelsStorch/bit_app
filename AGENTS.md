@@ -10,7 +10,7 @@ This project is a collection of interactive network simulation tools and games d
 - `public/planpro.php`: An advanced version of the diagram builder with IP routing logic and automatic gateway configuration.
 - `public/router.php`: A game where the user acts as a router, directing packets to the correct ports or gateway.
 - `database/router_game.sql`: SQL initialization script for the database.
-- `docs/README_PODMAN.md`: Instructions for running with Podman.
+- `docs/README_DOCKER.md`: Instructions for running with Docker.
 
 ## Technology Stack
 - **Frontend**: HTML5, JavaScript (Vanilla), Tailwind CSS.
