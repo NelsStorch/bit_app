@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10
+    container_name: router_game_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: router_game
+      MYSQL_USER: router_user
+      MYSQL_PASSWORD: router_password
+    volumes:
+      - ./router_game.sql:/docker-entrypoint-initdb.d/init.sql
+      - db_data:/var/lib/mysql
+
+  web:
+    build: .
+    container_name: router_game_web
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: router_game
+      DB_USER: router_user
+      DB_PASSWORD: router_password
+    depends_on:
+      - db
+
+volumes:
+  db_data:
