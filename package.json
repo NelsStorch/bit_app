@@ -6,7 +6,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "build": "npx tailwindcss -i ./public/input.css -o ./public/output.css --minify",
+    "build": "tailwindcss -i ./public/input.css -o ./public/output.css --minify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
