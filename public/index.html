@@ -7,51 +7,84 @@
 -->
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Lernplattform für Netzwerktechnik der Stadt Zürich. Interaktive Simulationen zu DNS, TCP/IP, Routing und Netzwerkplanung.">
+    <meta name="description"
+        content="Lernplattform für Netzwerktechnik der Stadt Zürich. Interaktive Simulationen zu DNS, TCP/IP, Routing und Netzwerkplanung.">
     <title>BIT 2025 | Netzwerk - Zürich</title>
-    <!-- Tailwind CSS via CDN für schnelles Styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS lokal (generiert) -->
+    <link href="output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Heller Hintergrund für einen sauberen Look */
-        }
-        .header-gradient {
-            background: linear-gradient(90deg, #0077b6, #00b4d8); /* Blautöne, modern und professionell */
-        }
-        /* Styling für die Link-Karten mit Hover-Effekten */
-        .link-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .link-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .footer-gradient {
-            background: linear-gradient(90deg, #023047, #005068);
+            background: radial-gradient(circle at center, #1b263b 0%, #0d1b2a 100%);
+            color: #e0e1dd;
+            margin: 0;
+            overflow-x: hidden;
         }
 
-        /* Container für Particles.js Canvas */
+        .header-gradient {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Styling für die Link-Karten mit Glassmorphism-Effekt */
+        .link-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .link-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .footer-gradient {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Container für Particles.js Canvas - Fixiert für bessere Chrome-Kompatibilität */
         #particles-js {
-            position: absolute;
+            position: fixed;
             width: 100%;
             height: 100%;
             top: 0;
             left: 0;
-            z-index: 0; /* Hinter dem Inhalt */
+            z-index: 0;
+            pointer-events: all;
+            /* Ermöglicht Interaktion */
+            background: transparent;
         }
-        /* Container für den eigentlichen Seiteninhalt, damit er über den Partikeln liegt */
+
+        /* Container für den eigentlichen Seiteninhalt */
         .content-container {
             position: relative;
-            z-index: 1;
+            z-index: 10;
+            pointer-events: none;
+            /* Lässt Klicks durch den Container zum Hintergrund durch, wenn nötig */
+        }
+
+        /* Alle interaktiven Elemente müssen pointer-events wieder einschalten */
+        .content-container>*,
+        .link-card,
+        button,
+        a {
+            pointer-events: all;
         }
     </style>
 </head>
-<body class="antialiased text-gray-800">
+
+<body class="antialiased">
 
     <!-- Hintergrund-Animation Container -->
     <div id="particles-js"></div>
@@ -69,83 +102,95 @@
         <!-- Hauptbereich mit Links -->
         <main class="flex-grow container mx-auto px-6 py-12">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-semibold text-gray-700">Wichtige Links</h2>
+                <h2 class="text-3xl font-semibold text-white">Wichtige Links</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
 
                 <!-- Link zu plan.php (Basis Version) -->
-                <a href="plan.php" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-blue-50">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <svg class="h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                <a href="plan.php" class="link-card rounded-2xl shadow-2xl overflow-hidden block p-8">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 p-4 bg-blue-500/10 rounded-xl">
+                            <svg class="h-10 w-10 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800">Netzwerkplan erstellen</h3>
-                            <p class="text-gray-600 mt-1">plan.php</p>
+                            <h3 class="text-2xl font-bold text-white tracking-tight">Netzwerkplan</h3>
+                            <p class="text-blue-200/60 mt-2 font-medium">Was steht im Zentrum?</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Link zu planpro.php (Pro Version) -->
-                <a href="planpro.php" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-blue-50">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <svg class="h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                <a href="planpro.php" class="link-card rounded-2xl shadow-2xl overflow-hidden block p-8">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 p-4 bg-indigo-500/10 rounded-xl">
+                            <svg class="h-10 w-10 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800">Netzwerkplan erstellen (Pro)</h3>
-                            <p class="text-gray-600 mt-1">planpro.php</p>
+                            <h3 class="text-2xl font-bold text-white tracking-tight">Netzwerkplan (Pro)</h3>
+                            <p class="text-indigo-200/60 mt-2 font-medium">Erweiterte Simulation</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Link zur PDF Aufgabe -->
-                <a href="pc_zu_pc.pdf" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-green-50">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <svg class="h-10 w-10 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <a href="pc_zu_pc.pdf" class="link-card rounded-2xl shadow-2xl overflow-hidden block p-8">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 p-4 bg-emerald-500/10 rounded-xl">
+                            <svg class="h-10 w-10 text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800">Aufgabe: PC zu PC verbinden</h3>
-                            <p class="text-gray-600 mt-1">pc_zu_pc.pdf</p>
+                            <h3 class="text-2xl font-bold text-white tracking-tight">Übung: PC zu PC</h3>
+                            <p class="text-emerald-200/60 mt-2 font-medium">Download PDF Anleitung</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Link zu Kahoot -->
-                <a href="https://kahoot.it/" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-purple-50">
-                    <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <svg class="h-10 w-10 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6" />
+                <a href="https://kahoot.it/" target="_blank"
+                    class="link-card rounded-2xl shadow-2xl overflow-hidden block p-8">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 p-4 bg-purple-500/10 rounded-xl">
+                            <svg class="h-10 w-10 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800">Kahoot! Quiz</h3>
-                            <p class="text-gray-600 mt-1">kahoot.it</p>
+                            <h3 class="text-2xl font-bold text-white tracking-tight">Kahoot! Quiz</h3>
+                            <p class="text-purple-200/60 mt-2 font-medium">Teste dein Wissen</p>
                         </div>
                     </div>
                 </a>
 
                 <!-- Link zum Router Spiel -->
-                <a href="router.php" class="link-card bg-white rounded-xl shadow-md overflow-hidden block p-6 hover:bg-yellow-50">
-                     <div class="flex items-center space-x-4">
-                        <div class="flex-shrink-0">
-                            <svg class="h-10 w-10 text-yellow-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                <a href="router.php" class="link-card rounded-2xl shadow-2xl overflow-hidden block p-8">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex-shrink-0 p-4 bg-amber-500/10 rounded-xl">
+                            <svg class="h-10 w-10 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-800">Router Spiel: Pakete zuweisen</h3>
-                            <p class="text-gray-600 mt-1">router.php</p>
+                            <h3 class="text-2xl font-bold text-white tracking-tight">IP Router Game</h3>
+                            <p class="text-amber-200/60 mt-2 font-medium">Pakete zuweisen</p>
                         </div>
                     </div>
                 </a>
@@ -170,57 +215,54 @@
             particlesJS("particles-js", {
                 "particles": {
                     "number": {
-                        "value": 80, // Anzahl der Partikel
+                        "value": 100,
                         "density": {
                             "enable": true,
                             "value_area": 800
                         }
                     },
                     "color": {
-                        "value": "#ffffff" // Farbe der Partikel (Weiss)
+                        "value": "#4cc9f0"
                     },
                     "shape": {
-                        "type": "circle", // Form
+                        "type": "circle",
                         "stroke": {
                             "width": 0,
                             "color": "#000000"
-                        },
-                        "polygon": {
-                            "nb_sides": 5
                         }
                     },
                     "opacity": {
-                        "value": 0.5, // Transparenz
-                        "random": false,
+                        "value": 0.6,
+                        "random": true,
                         "anim": {
-                            "enable": false,
+                            "enable": true,
                             "speed": 1,
                             "opacity_min": 0.1,
                             "sync": false
                         }
                     },
                     "size": {
-                        "value": 3, // Grösse
+                        "value": 3,
                         "random": true,
                         "anim": {
-                            "enable": false,
-                            "speed": 40,
+                            "enable": true,
+                            "speed": 2,
                             "size_min": 0.1,
                             "sync": false
                         }
                     },
                     "line_linked": {
                         "enable": true,
-                        "distance": 150, // Maximale Distanz für Verbindungslinien
-                        "color": "#ffffff",
-                        "opacity": 0.4,
-                        "width": 1
+                        "distance": 150,
+                        "color": "#4cc9f0",
+                        "opacity": 0.3,
+                        "width": 1.5
                     },
                     "move": {
                         "enable": true,
-                        "speed": 2, // Geschwindigkeit
+                        "speed": 1.5,
                         "direction": "none",
-                        "random": false,
+                        "random": true,
                         "straight": false,
                         "out_mode": "out",
                         "bounce": false,
@@ -232,41 +274,27 @@
                     }
                 },
                 "interactivity": {
-                    "detect_on": "canvas",
+                    "detect_on": "window",
                     "events": {
                         "onhover": {
                             "enable": true,
-                            "mode": "grab" // Interaktion bei Maus-Hover (Linien greifen)
+                            "mode": "grab"
                         },
                         "onclick": {
                             "enable": true,
-                            "mode": "push" // Interaktion bei Klick (neue Partikel)
+                            "mode": "push"
                         },
                         "resize": true
                     },
                     "modes": {
                         "grab": {
-                            "distance": 140,
-                            "line_linked": {
-                                "opacity": 1
-                            }
-                        },
-                        "bubble": {
-                            "distance": 400,
-                            "size": 40,
-                            "duration": 2,
-                            "opacity": 8,
-                            "speed": 3
-                        },
-                        "repulse": {
                             "distance": 200,
-                            "duration": 0.4
+                            "line_linked": {
+                                "opacity": 0.8
+                            }
                         },
                         "push": {
                             "particles_nb": 4
-                        },
-                        "remove": {
-                            "particles_nb": 2
                         }
                     }
                 },
@@ -276,4 +304,5 @@
     </script>
 
 </body>
+
 </html>
