@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   db:
-    image: mariadb:10
+    image: mariadb:10.5
     container_name: router_game_db
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -18,6 +18,9 @@ services:
     container_name: router_game_web
     ports:
       - "8080:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./custom.ini:/usr/local/etc/php/conf.d/custom.ini
     environment:
       DB_HOST: db
       DB_NAME: router_game
