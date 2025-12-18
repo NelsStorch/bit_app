@@ -10,7 +10,7 @@ services:
       MYSQL_USER: router_user
       MYSQL_PASSWORD: router_password
     volumes:
-      - ./router_game.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/router_game.sql:/docker-entrypoint-initdb.d/init.sql
       - db_data:/var/lib/mysql
 
   web:
