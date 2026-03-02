@@ -1,8 +1,8 @@
-<!--
+﻿<!--
   Datei: plan2.php
   Beschreibung: Erweiterte Version des Netzwerk-Diagrammerstellers.
-  Bietet zusätzlich Undo/Redo-Funktionalität, Kontextmenüs (Rechtsklick)
-  und detaillierte Konfigurationsmöglichkeiten für Geräte (Hostname, IP) und Verbindungen (Typ).
+  Bietet zusÃ¤tzlich Undo/Redo-FunktionalitÃ¤t, KontextmenÃ¼s (Rechtsklick)
+  und detaillierte KonfigurationsmÃ¶glichkeiten fÃ¼r GerÃ¤te (Hostname, IP) und Verbindungen (Typ).
 
   Technologien: HTML5 Canvas, JavaScript, Tailwind CSS
 -->
@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netzwerk-Diagrammersteller mit erweiterten Funktionen</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="vendor/js/tailwindcss.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
         .toolbar { display: flex; flex-wrap: wrap; }
@@ -35,7 +35,7 @@
         .tooltip { position: absolute; background-color: #333; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; visibility: hidden; opacity: 0; transition: opacity 0.2s; z-index: 10000; pointer-events: none; }
         .message-overlay { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.75); color: white; padding: 10px 20px; border-radius: 8px; z-index: 10100; font-size: 14px; display: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         
-        /* Kontextmenü Styles */
+        /* KontextmenÃ¼ Styles */
         .context-menu { position: absolute; background-color: white; border: 1px solid #ccc; box-shadow: 2px 2px 5px rgba(0,0,0,0.15); z-index: 1000; min-width: 150px; border-radius: 4px; padding: 4px 0; }
         .context-menu-item { padding: 8px 12px; cursor: pointer; font-size: 14px; }
         .context-menu-item:hover { background-color: #f0f0f0; }
@@ -51,53 +51,53 @@
         .modal-actions { text-align: right; margin-top: 15px; }
         .modal-actions button { margin-left: 10px; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="vendor/css/inter.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 flex flex-col h-screen">
 
     <!-- Werkzeugleiste mit Undo/Redo Buttons -->
     <div class="bg-white shadow-md p-2 flex items-center space-x-1 print:hidden toolbar">
-        <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufügen">
-            <div class="device-icon">💻</div><span class="text-xs mt-1">PC</span>
+        <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufÃ¼gen">
+            <div class="device-icon">ðŸ’»</div><span class="text-xs mt-1">PC</span>
         </div>
-        <div id="addLaptop" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Laptop hinzufügen">
-            <div class="device-icon">🖥️</div><span class="text-xs mt-1">Laptop</span>
+        <div id="addLaptop" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Laptop hinzufÃ¼gen">
+            <div class="device-icon">ðŸ–¥ï¸</div><span class="text-xs mt-1">Laptop</span>
         </div>
-        <div id="addRouter" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Router hinzufügen">
-            <div class="device-icon">🌐</div><span class="text-xs mt-1">Router</span>
+        <div id="addRouter" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Router hinzufÃ¼gen">
+            <div class="device-icon">ðŸŒ</div><span class="text-xs mt-1">Router</span>
         </div>
-        <div id="addSwitch" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Switch hinzufügen">
-            <div class="device-icon">↔️</div><span class="text-xs mt-1">Switch</span>
+        <div id="addSwitch" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Switch hinzufÃ¼gen">
+            <div class="device-icon">â†”ï¸</div><span class="text-xs mt-1">Switch</span>
         </div>
-        <div id="addServer" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Server hinzufügen">
-            <div class="device-icon">🗄️</div><span class="text-xs mt-1">Server</span>
+        <div id="addServer" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Server hinzufÃ¼gen">
+            <div class="device-icon">ðŸ—„ï¸</div><span class="text-xs mt-1">Server</span>
         </div>
-        <div id="addInternet" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Internet hinzufügen">
-            <div class="device-icon">☁️</div><span class="text-xs mt-1">Internet</span>
+        <div id="addInternet" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Internet hinzufÃ¼gen">
+            <div class="device-icon">â˜ï¸</div><span class="text-xs mt-1">Internet</span>
         </div>
         <div class="flex-grow"></div>
-        <button id="undoButton" class="button-std button-secondary" title="Rückgängig (Ctrl+Z)">↩️</button>
-        <button id="redoButton" class="button-std button-secondary" title="Wiederherstellen (Ctrl+Y)">↪️</button>
+        <button id="undoButton" class="button-std button-secondary" title="RÃ¼ckgÃ¤ngig (Ctrl+Z)">â†©ï¸</button>
+        <button id="redoButton" class="button-std button-secondary" title="Wiederherstellen (Ctrl+Y)">â†ªï¸</button>
         <button id="connectMode" class="button-std button-secondary">Verbinden</button>
         <button id="packetSendMode" class="button-std button-secondary">Paket</button>
-        <button id="deleteMode" class="button-std button-warning">Löschen</button>
+        <button id="deleteMode" class="button-std button-warning">LÃ¶schen</button>
         <button id="clearCanvas" class="button-std button-danger">Leeren</button>
     </div>
 
-    <!-- Zeichenfläche -->
+    <!-- ZeichenflÃ¤che -->
     <div class="flex-grow p-2 relative" id="canvasContainer">
         <canvas id="networkCanvas"></canvas>
         <div id="messageOverlay" class="message-overlay"></div>
-        <!-- Kontextmenü Container -->
+        <!-- KontextmenÃ¼ Container -->
         <div id="contextMenu" class="context-menu" style="display: none;"></div>
     </div>
 
     <div id="tooltip" class="tooltip"></div>
 
-    <!-- Modal für Gerätekonfiguration -->
+    <!-- Modal fÃ¼r GerÃ¤tekonfiguration -->
     <div id="deviceConfigModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 id="deviceConfigTitle">Gerätekonfiguration</h3>
+            <h3 id="deviceConfigTitle">GerÃ¤tekonfiguration</h3>
             <div>
                 <label for="deviceHostname">Hostname:</label>
                 <input type="text" id="deviceHostname">
@@ -113,7 +113,7 @@
         </div>
     </div>
 
-    <!-- Modal für Verbindungskonfiguration -->
+    <!-- Modal fÃ¼r Verbindungskonfiguration -->
     <div id="connectionConfigModal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="connectionConfigTitle">Verbindungstyp</h3>
@@ -149,7 +149,7 @@
         let nextDeviceId = 0;
         let nextPacketId = 0;
 
-        // Modi und Zustände
+        // Modi und ZustÃ¤nde
         let selectedDeviceType = null;
         let isConnecting = false;
         let firstDeviceForConnection = null;
@@ -160,8 +160,8 @@
         let dragOffsetX, dragOffsetY;
         let animationFrameId = null;
 
-        let currentConfiguringDevice = null; // Für Geräte-Modal
-        let currentConfiguringConnection = null; // Für Verbindungs-Modal
+        let currentConfiguringDevice = null; // FÃ¼r GerÃ¤te-Modal
+        let currentConfiguringConnection = null; // FÃ¼r Verbindungs-Modal
 
         // Undo/Redo Stacks
         const undoStack = [];
@@ -170,12 +170,12 @@
 
 
         const deviceProperties = {
-            pc: { icon: '💻', baseWidth: 50, baseHeight: 50, color: '#60a5fa', label: 'PC', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.' },
-            laptop: { icon: '🖥️', baseWidth: 50, baseHeight: 45, color: '#a78bfa', label: 'Laptop', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.' },
-            router: { icon: '🌐', baseWidth: 60, baseHeight: 60, color: '#34d399', label: 'Router', isForwarder: true, maxPorts: 2, defaultIpPrefix: '192.168.0.' },
-            switch: { icon: '↔️', baseWidth: 70, baseHeight: 40, color: '#fbbf24', label: 'Switch', isForwarder: true, maxPorts: 8, defaultIpPrefix: '192.168.1.' },
-            server: { icon: '🗄️', baseWidth: 60, baseHeight: 70, color: '#f59e0b', label: 'Server', isForwarder: false, maxPorts: 2, defaultIpPrefix: '10.0.0.' },
-            internet: { icon: '☁️', baseWidth: 70, baseHeight: 50, color: '#93c5fd', label: 'Internet', isForwarder: true, maxPorts: Infinity, defaultIpPrefix: '203.0.113.' }
+            pc: { icon: 'ðŸ’»', baseWidth: 50, baseHeight: 50, color: '#60a5fa', label: 'PC', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.' },
+            laptop: { icon: 'ðŸ–¥ï¸', baseWidth: 50, baseHeight: 45, color: '#a78bfa', label: 'Laptop', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.' },
+            router: { icon: 'ðŸŒ', baseWidth: 60, baseHeight: 60, color: '#34d399', label: 'Router', isForwarder: true, maxPorts: 2, defaultIpPrefix: '192.168.0.' },
+            switch: { icon: 'â†”ï¸', baseWidth: 70, baseHeight: 40, color: '#fbbf24', label: 'Switch', isForwarder: true, maxPorts: 8, defaultIpPrefix: '192.168.1.' },
+            server: { icon: 'ðŸ—„ï¸', baseWidth: 60, baseHeight: 70, color: '#f59e0b', label: 'Server', isForwarder: false, maxPorts: 2, defaultIpPrefix: '10.0.0.' },
+            internet: { icon: 'â˜ï¸', baseWidth: 70, baseHeight: 50, color: '#93c5fd', label: 'Internet', isForwarder: true, maxPorts: Infinity, defaultIpPrefix: '203.0.113.' }
         };
         const connectionTypes = {
             ethernet: { color: '#3b82f6', lineDash: [] },
@@ -319,7 +319,7 @@
             device.width = Math.max(deviceProperties[device.type].baseWidth, iconWidth + 10, labelWidth + 10);
             device.height = deviceProperties[device.type].baseHeight + labelFontSize + 8 + (portInfoFontSize + 4); 
 
-            // Geräte-Körper
+            // GerÃ¤te-KÃ¶rper
             ctx.fillStyle = deviceProperties[device.type].color;
             ctx.strokeStyle = '#374151';
             ctx.lineWidth = 1;
@@ -345,7 +345,7 @@
             // Port Infos
             const props = deviceProperties[device.type];
             const currentConnections = getDeviceConnectionCount(device.id);
-            const portText = `Ports: ${currentConnections}/${props.maxPorts === Infinity ? '∞' : props.maxPorts}`;
+            const portText = `Ports: ${currentConnections}/${props.maxPorts === Infinity ? 'âˆž' : props.maxPorts}`;
             ctx.font = `${portInfoFontSize}px Arial`;
             ctx.fillStyle = '#333333';
             const portInfoYOffset = hostnameYOffset + (labelFontSize/2) + (portInfoFontSize/2) + 2;
@@ -423,7 +423,7 @@
         document.getElementById('packetSendMode').addEventListener('click', togglePacketSendMode);
         document.getElementById('deleteMode').addEventListener('click', toggleDeleteMode);
         document.getElementById('clearCanvas').addEventListener('click', () => {
-            if (confirm('Möchten Sie die Arbeitsfläche wirklich leeren? Alle Elemente gehen verloren.')) {
+            if (confirm('MÃ¶chten Sie die ArbeitsflÃ¤che wirklich leeren? Alle Elemente gehen verloren.')) {
                 saveState(); 
                 devices = []; connections = []; packets = [];
                 nextDeviceId = 0; nextPacketId = 0;
@@ -452,7 +452,7 @@
             isSendingPacketMode ? packetSendBtn.classList.remove('button-secondary') : packetSendBtn.classList.add('button-secondary');
 
             const deleteBtn = document.getElementById('deleteMode');
-            deleteBtn.textContent = isDeletingMode ? "Löschen (aktiv)" : "Löschen";
+            deleteBtn.textContent = isDeletingMode ? "LÃ¶schen (aktiv)" : "LÃ¶schen";
             isDeletingMode ? deleteBtn.classList.add('button-danger') : deleteBtn.classList.remove('button-danger');
             isDeletingMode ? deleteBtn.classList.remove('button-warning') : deleteBtn.classList.add('button-warning');
             updateUndoRedoButtons();
@@ -490,7 +490,7 @@
             updateToolbarButtons(); redrawCanvas();
         }
 
-        // --- Canvas Event Handler (Klick, Mausbewegung, Kontextmenü) ---
+        // --- Canvas Event Handler (Klick, Mausbewegung, KontextmenÃ¼) ---
         canvas.addEventListener('click', (event) => {
             if (event.button !== 0) return; 
 
@@ -566,8 +566,8 @@
                         let tooltipText = `<b>Paket ${hoveredPacket.id}</b><br>Status: ${hoveredPacket.status === 'traveling' ? 'Unterwegs' : 'Verarbeitung'}<br>`;
                         tooltipText += `Von: ${hoveredPacket.sourceIp} (${sourceDev?.hostname || 'Unbekannt'})<br>`;
                         tooltipText += `Nach: ${hoveredPacket.destinationIp} (${destDev?.hostname || 'Unbekannt'})<br>`;
-                        if (currentHopDev) tooltipText += `Akt. Hop: ${currentHopDev.hostname || `Gerät ${currentHopDev.id}`}<br>`;
-                        if (nextHopDev) tooltipText += `Nächst. Hop: ${nextHopDev.hostname || `Gerät ${nextHopDev.id}`}`;
+                        if (currentHopDev) tooltipText += `Akt. Hop: ${currentHopDev.hostname || `GerÃ¤t ${currentHopDev.id}`}<br>`;
+                        if (nextHopDev) tooltipText += `NÃ¤chst. Hop: ${nextHopDev.hostname || `GerÃ¤t ${nextHopDev.id}`}`;
                         
                         showTooltip(tooltipText, event.clientX, event.clientY);
                         canvas.style.cursor = 'help';
@@ -581,7 +581,7 @@
                          const fromDev = devices.find(d => d.id === hoveredConnection.fromDeviceId);
                          const toDev = devices.find(d => d.id === hoveredConnection.toDeviceId);
                          const typeName = Object.keys(connectionTypes).find(k => connectionTypes[k] === connectionTypes[hoveredConnection.type || 'ethernet']) || hoveredConnection.type || 'Ethernet';
-                         showTooltip(`Verbindung (${typeName})<br>Zwischen: ${fromDev?.hostname || `Gerät ${fromDev?.id}`} & ${toDev?.hostname || `Gerät ${toDev?.id}`}`, event.clientX, event.clientY);
+                         showTooltip(`Verbindung (${typeName})<br>Zwischen: ${fromDev?.hostname || `GerÃ¤t ${fromDev?.id}`} & ${toDev?.hostname || `GerÃ¤t ${toDev?.id}`}`, event.clientX, event.clientY);
                          canvas.style.cursor = isDeletingMode ? 'cell' : 'crosshair';
                          onElement = true;
                     }
@@ -622,7 +622,7 @@
             }
         });
         
-        // --- Kontextmenü Logik ---
+        // --- KontextmenÃ¼ Logik ---
         canvas.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             const rect = canvas.getBoundingClientRect();
@@ -650,11 +650,11 @@
             if (type === 'device') {
                 addContextMenuItem('Konfigurieren...', () => openDeviceConfigModal(item));
                 addContextMenuSeparator();
-                addContextMenuItem('Löschen', () => { deleteDevice(item); hideContextMenu(); });
+                addContextMenuItem('LÃ¶schen', () => { deleteDevice(item); hideContextMenu(); });
             } else if (type === 'connection') {
-                addContextMenuItem('Verbindungstyp ändern...', () => openConnectionConfigModal(item));
+                addContextMenuItem('Verbindungstyp Ã¤ndern...', () => openConnectionConfigModal(item));
                 addContextMenuSeparator();
-                addContextMenuItem('Löschen', () => { deleteConnection(item); hideContextMenu(); });
+                addContextMenuItem('LÃ¶schen', () => { deleteConnection(item); hideContextMenu(); });
             }
         }
 
@@ -701,7 +701,7 @@
         });
 
 
-        // --- Modals für Konfiguration ---
+        // --- Modals fÃ¼r Konfiguration ---
         function openDeviceConfigModal(device) {
             currentConfiguringDevice = device;
             document.getElementById('deviceConfigTitle').textContent = `Konfig: ${device.hostname || deviceProperties[device.type].label + '-' + device.id}`;
@@ -726,7 +726,7 @@
 
         function openConnectionConfigModal(connection) {
             currentConfiguringConnection = connection;
-            document.getElementById('connectionConfigTitle').textContent = `Verbindungstyp ändern`;
+            document.getElementById('connectionConfigTitle').textContent = `Verbindungstyp Ã¤ndern`;
             document.getElementById('connectionTypeSelect').value = connection.type || 'ethernet';
             connectionConfigModal.classList.add('active');
         }
@@ -745,7 +745,7 @@
         document.getElementById('cancelConnectionConfig').addEventListener('click', hideConnectionConfigModal);
 
 
-        // --- Kernfunktionen (Hinzufügen, Löschen, Verbinden, Paket) ---
+        // --- Kernfunktionen (HinzufÃ¼gen, LÃ¶schen, Verbinden, Paket) ---
         function addDevice(x, y, type) {
             saveState(); 
             const deviceData = deviceProperties[type];
@@ -790,12 +790,12 @@
                         const clickedDeviceConnections = getDeviceConnectionCount(clickedDevice.id);
 
                         if (firstDeviceConnections >= firstDeviceProps.maxPorts) {
-                            showMessage(`${firstDeviceProps.label} ${firstDeviceForConnection.hostname || `Gerät ${firstDeviceForConnection.id}`} hat bereits die maximale Anzahl von ${firstDeviceProps.maxPorts} Verbindungen.`, 3000);
+                            showMessage(`${firstDeviceProps.label} ${firstDeviceForConnection.hostname || `GerÃ¤t ${firstDeviceForConnection.id}`} hat bereits die maximale Anzahl von ${firstDeviceProps.maxPorts} Verbindungen.`, 3000);
                             firstDeviceForConnection = null;
                             redrawCanvas(); return;
                         }
                         if (clickedDeviceConnections >= clickedDeviceProps.maxPorts) {
-                            showMessage(`${clickedDeviceProps.label} ${clickedDevice.hostname || `Gerät ${clickedDevice.id}`} hat bereits die maximale Anzahl von ${clickedDeviceProps.maxPorts} Verbindungen.`, 3000);
+                            showMessage(`${clickedDeviceProps.label} ${clickedDevice.hostname || `GerÃ¤t ${clickedDevice.id}`} hat bereits die maximale Anzahl von ${clickedDeviceProps.maxPorts} Verbindungen.`, 3000);
                             firstDeviceForConnection = null; 
                             redrawCanvas(); return;
                         }
@@ -824,7 +824,7 @@
             devices = devices.filter(d => d.id !== deviceToDelete.id);
             connections = connections.filter(conn => conn.fromDeviceId !== deviceToDelete.id && conn.toDeviceId !== deviceToDelete.id);
             packets = packets.filter(p => !p.path.includes(deviceToDelete.id));
-            showMessage(`${deviceProperties[deviceToDelete.type].label} ${deviceToDelete.hostname || `Gerät ${deviceToDelete.id}`} gelöscht.`, 2000);
+            showMessage(`${deviceProperties[deviceToDelete.type].label} ${deviceToDelete.hostname || `GerÃ¤t ${deviceToDelete.id}`} gelÃ¶scht.`, 2000);
             redrawCanvas();
         }
 
@@ -842,7 +842,7 @@
             });
             const fromDev = devices.find(d => d.id === connectionToDelete.fromDeviceId);
             const toDev = devices.find(d => d.id === connectionToDelete.toDeviceId);
-            showMessage(`Verbindung zwischen ${fromDev?.hostname || `Gerät ${fromDev?.id}`} und ${toDev?.hostname || `Gerät ${toDev?.id}`} gelöscht.`, 2000);
+            showMessage(`Verbindung zwischen ${fromDev?.hostname || `GerÃ¤t ${fromDev?.id}`} und ${toDev?.hostname || `GerÃ¤t ${toDev?.id}`} gelÃ¶scht.`, 2000);
             redrawCanvas();
         }
 
@@ -854,7 +854,7 @@
                     packetSourceDevice = clickedDevice;
                 } else {
                     if(packetSourceDevice.id === clickedDevice.id) {
-                        showMessage("Quelle und Ziel dürfen nicht identisch sein.", 2000);
+                        showMessage("Quelle und Ziel dÃ¼rfen nicht identisch sein.", 2000);
                         packetSourceDevice = null;
                         redrawCanvas(); return;
                     }
@@ -862,7 +862,7 @@
                     if(pathDeviceIds && pathDeviceIds.length > 0){
                         createPacket(packetSourceDevice, clickedDevice, pathDeviceIds);
                     } else {
-                       showMessage(`Kein gültiger Pfad von ${packetSourceDevice.hostname || `Gerät ${packetSourceDevice.id}`} zu ${clickedDevice.hostname || `Gerät ${clickedDevice.id}`} gefunden.`);
+                       showMessage(`Kein gÃ¼ltiger Pfad von ${packetSourceDevice.hostname || `GerÃ¤t ${packetSourceDevice.id}`} zu ${clickedDevice.hostname || `GerÃ¤t ${clickedDevice.id}`} gefunden.`);
                     }
                     packetSourceDevice = null;
                 }
@@ -1026,7 +1026,7 @@
                         packet.progress = 1;
                         if (currentSegmentNextHopDevice.id === packet.finalDestinationDeviceId) {
                             packets.splice(i, 1);
-                            showMessage(`Paket ${packet.id} hat ${currentSegmentNextHopDevice.hostname || `Gerät ${currentSegmentNextHopDevice.id}`} erreicht!`, 2000);
+                            showMessage(`Paket ${packet.id} hat ${currentSegmentNextHopDevice.hostname || `GerÃ¤t ${currentSegmentNextHopDevice.id}`} erreicht!`, 2000);
                         } else {
                             packet.status = 'processing';
                             packet.processingTimer = packetProcessingTime;
@@ -1070,3 +1070,4 @@
     </script>
 </body>
 </html>
+

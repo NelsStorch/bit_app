@@ -1,7 +1,7 @@
-<!--
+﻿<!--
   Datei: planpro.php
   Beschreibung: Die professionellste Version des Netzwerk-Diagrammerstellers.
-  Zusätzlich zu den Funktionen von plan2.php bietet diese Version eine IP-Routing-Logik.
+  ZusÃ¤tzlich zu den Funktionen von plan2.php bietet diese Version eine IP-Routing-Logik.
   Pakete werden nur weitergeleitet, wenn IP-Adressen, Subnetzmasken und Gateways korrekt konfiguriert sind.
 
   Technologien: HTML5 Canvas, JavaScript (IP-Berechnung), Tailwind CSS
@@ -12,7 +12,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Netzwerk-Diagrammersteller mit IP-Routing</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="vendor/js/tailwindcss.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
         .toolbar { display: flex; flex-wrap: wrap; }
@@ -49,39 +49,39 @@
         .modal-actions { text-align: right; margin-top: 15px; }
         .modal-actions button { margin-left: 10px; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="vendor/css/inter.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100 flex flex-col h-screen">
 
     <div class="bg-white shadow-md p-2 flex items-center space-x-1 print:hidden toolbar">
         <a href="index.html" class="toolbar-item p-2 border rounded-lg flex flex-col items-center text-black no-underline" title="Zur Startseite">
-            <div class="device-icon">🏠</div><span class="text-xs mt-1">Home</span>
+            <div class="device-icon">ðŸ </div><span class="text-xs mt-1">Home</span>
         </a>
         <div class="w-px h-10 bg-gray-300 mx-2"></div>
-        <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufügen">
-            <div class="device-icon">💻</div><span class="text-xs mt-1">PC</span>
+        <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufÃ¼gen">
+            <div class="device-icon">ðŸ’»</div><span class="text-xs mt-1">PC</span>
         </div>
-        <div id="addLaptop" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Laptop hinzufügen">
-            <div class="device-icon">🖥️</div><span class="text-xs mt-1">Laptop</span>
+        <div id="addLaptop" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Laptop hinzufÃ¼gen">
+            <div class="device-icon">ðŸ–¥ï¸</div><span class="text-xs mt-1">Laptop</span>
         </div>
-        <div id="addRouter" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Router hinzufügen">
-            <div class="device-icon">🌐</div><span class="text-xs mt-1">Router</span>
+        <div id="addRouter" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Router hinzufÃ¼gen">
+            <div class="device-icon">ðŸŒ</div><span class="text-xs mt-1">Router</span>
         </div>
-        <div id="addSwitch" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Switch hinzufügen">
-            <div class="device-icon">↔️</div><span class="text-xs mt-1">Switch</span>
+        <div id="addSwitch" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Switch hinzufÃ¼gen">
+            <div class="device-icon">â†”ï¸</div><span class="text-xs mt-1">Switch</span>
         </div>
-        <div id="addServer" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Server hinzufügen">
-            <div class="device-icon">🗄️</div><span class="text-xs mt-1">Server</span>
+        <div id="addServer" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Server hinzufÃ¼gen">
+            <div class="device-icon">ðŸ—„ï¸</div><span class="text-xs mt-1">Server</span>
         </div>
-        <div id="addInternet" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Internet hinzufügen">
-            <div class="device-icon">☁️</div><span class="text-xs mt-1">Internet</span>
+        <div id="addInternet" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Internet hinzufÃ¼gen">
+            <div class="device-icon">â˜ï¸</div><span class="text-xs mt-1">Internet</span>
         </div>
         <div class="flex-grow"></div>
-        <button id="undoButton" class="button-std button-secondary" title="Rückgängig (Ctrl+Z)">↩️</button>
-        <button id="redoButton" class="button-std button-secondary" title="Wiederherstellen (Ctrl+Y)">↪️</button>
+        <button id="undoButton" class="button-std button-secondary" title="RÃ¼ckgÃ¤ngig (Ctrl+Z)">â†©ï¸</button>
+        <button id="redoButton" class="button-std button-secondary" title="Wiederherstellen (Ctrl+Y)">â†ªï¸</button>
         <button id="connectMode" class="button-std button-secondary">Verbinden</button>
         <button id="packetSendMode" class="button-std button-secondary">Paket</button>
-        <button id="deleteMode" class="button-std button-warning">Löschen</button>
+        <button id="deleteMode" class="button-std button-warning">LÃ¶schen</button>
         <button id="clearCanvas" class="button-std button-danger">Leeren</button>
     </div>
 
@@ -95,7 +95,7 @@
 
     <div id="deviceConfigModal" class="modal-overlay">
         <div class="modal-content">
-            <h3 id="deviceConfigTitle">Gerätekonfiguration</h3>
+            <h3 id="deviceConfigTitle">GerÃ¤tekonfiguration</h3>
             <div>
                 <label for="deviceHostname">Hostname:</label>
                 <input type="text" id="deviceHostname" placeholder="z.B. PC-Arbeit">
@@ -172,12 +172,12 @@
         const MAX_UNDO_STEPS = 30;
 
         const deviceProperties = {
-            pc: { icon: '💻', baseWidth: 50, baseHeight: 50, color: '#60a5fa', label: 'PC', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.', defaultSubnetMask: '255.255.255.0', hasGateway: true },
-            laptop: { icon: '🖥️', baseWidth: 50, baseHeight: 45, color: '#a78bfa', label: 'Laptop', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.', defaultSubnetMask: '255.255.255.0', hasGateway: true },
-            router: { icon: '🌐', baseWidth: 60, baseHeight: 60, color: '#34d399', label: 'Router', isForwarder: true, maxPorts: 4, defaultIpPrefix: '192.168.1.', defaultSubnetMask: '255.255.255.0', hasGateway: false }, 
-            switch: { icon: '↔️', baseWidth: 70, baseHeight: 40, color: '#fbbf24', label: 'Switch', isForwarder: true, maxPorts: 8, defaultIpPrefix: '', defaultSubnetMask: '', hasGateway: false },
-            server: { icon: '🗄️', baseWidth: 60, baseHeight: 70, color: '#f59e0b', label: 'Server', isForwarder: false, maxPorts: 2, defaultIpPrefix: '192.168.10.', defaultSubnetMask: '255.255.255.0', hasGateway: true },
-            internet: { icon: '☁️', baseWidth: 70, baseHeight: 50, color: '#93c5fd', label: 'Internet', isForwarder: true, maxPorts: Infinity, defaultIpPrefix: '203.0.113.', defaultSubnetMask: '255.255.255.0', hasGateway: false } 
+            pc: { icon: 'ðŸ’»', baseWidth: 50, baseHeight: 50, color: '#60a5fa', label: 'PC', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.', defaultSubnetMask: '255.255.255.0', hasGateway: true },
+            laptop: { icon: 'ðŸ–¥ï¸', baseWidth: 50, baseHeight: 45, color: '#a78bfa', label: 'Laptop', isForwarder: false, maxPorts: 1, defaultIpPrefix: '192.168.1.', defaultSubnetMask: '255.255.255.0', hasGateway: true },
+            router: { icon: 'ðŸŒ', baseWidth: 60, baseHeight: 60, color: '#34d399', label: 'Router', isForwarder: true, maxPorts: 4, defaultIpPrefix: '192.168.1.', defaultSubnetMask: '255.255.255.0', hasGateway: false }, 
+            switch: { icon: 'â†”ï¸', baseWidth: 70, baseHeight: 40, color: '#fbbf24', label: 'Switch', isForwarder: true, maxPorts: 8, defaultIpPrefix: '', defaultSubnetMask: '', hasGateway: false },
+            server: { icon: 'ðŸ—„ï¸', baseWidth: 60, baseHeight: 70, color: '#f59e0b', label: 'Server', isForwarder: false, maxPorts: 2, defaultIpPrefix: '192.168.10.', defaultSubnetMask: '255.255.255.0', hasGateway: true },
+            internet: { icon: 'â˜ï¸', baseWidth: 70, baseHeight: 50, color: '#93c5fd', label: 'Internet', isForwarder: true, maxPorts: Infinity, defaultIpPrefix: '203.0.113.', defaultSubnetMask: '255.255.255.0', hasGateway: false } 
         };
         const connectionTypes = {
             ethernet: { color: '#3b82f6', lineDash: [] },
@@ -197,7 +197,7 @@
         const tooltipElement = document.getElementById('tooltip');
 
         // --- IP-Adressen Hilfsfunktionen ---
-        /** Wandelt IP-String in Integer um (für Bit-Operationen) */
+        /** Wandelt IP-String in Integer um (fÃ¼r Bit-Operationen) */
         function ipToLong(ip) {
             if (!ip || typeof ip !== 'string') return 0;
             const parts = ip.split('.');
@@ -220,13 +220,13 @@
             return longToIp((ipLong & maskLong) >>> 0);
         }
         
-        /** Wandelt Integer zurück in IP-String */
+        /** Wandelt Integer zurÃ¼ck in IP-String */
         function longToIp(long) {
             if (long < 0 || long > 0xFFFFFFFF) return null; 
             return `${(long >>> 24)}.${(long >> 16 & 0xFF)}.${(long >> 8 & 0xFF)}.${(long & 0xFF)}`;
         }
 
-        /** Prüft, ob zwei Geräte im selben Subnetz sind */
+        /** PrÃ¼ft, ob zwei GerÃ¤te im selben Subnetz sind */
         function areInSameSubnet(device1, device2) {
             if (!device1 || !device2 || !device1.ipAddress || !device2.ipAddress || !device1.subnetMask || !device2.subnetMask) {
                 return false;
@@ -345,7 +345,7 @@
                 dynamicHeight += ipFontSize + 4; 
             }
             if (deviceProperties[device.type].hasGateway && device.gateway) {
-                dynamicHeight += ipFontSize + 4; // Für Gateway Anzeige
+                dynamicHeight += ipFontSize + 4; // FÃ¼r Gateway Anzeige
             }
             dynamicHeight += portInfoFontSize + 4; 
             device.height = dynamicHeight;
@@ -386,7 +386,7 @@
             
             const props = deviceProperties[device.type];
             const currentConnections = getDeviceConnectionCount(device.id);
-            const portText = `Ports: ${currentConnections}/${props.maxPorts === Infinity ? '∞' : props.maxPorts}`;
+            const portText = `Ports: ${currentConnections}/${props.maxPorts === Infinity ? 'âˆž' : props.maxPorts}`;
             ctx.font = `${portInfoFontSize}px Arial`; ctx.fillStyle = '#333333';
             ctx.fillText(portText, device.x, currentYOffset);
         }
@@ -447,7 +447,7 @@
         document.getElementById('packetSendMode').addEventListener('click', togglePacketSendMode);
         document.getElementById('deleteMode').addEventListener('click', toggleDeleteMode);
         document.getElementById('clearCanvas').addEventListener('click', () => {
-            if (confirm('Möchten Sie die Arbeitsfläche wirklich leeren? Alle Elemente gehen verloren.')) {
+            if (confirm('MÃ¶chten Sie die ArbeitsflÃ¤che wirklich leeren? Alle Elemente gehen verloren.')) {
                 saveState(); 
                 devices = []; connections = []; packets = [];
                 nextDeviceId = 0; nextPacketId = 0;
@@ -474,7 +474,7 @@
             isSendingPacketMode ? packetSendBtn.classList.remove('button-secondary') : packetSendBtn.classList.add('button-secondary');
 
             const deleteBtn = document.getElementById('deleteMode');
-            deleteBtn.textContent = isDeletingMode ? "Löschen (aktiv)" : "Löschen";
+            deleteBtn.textContent = isDeletingMode ? "LÃ¶schen (aktiv)" : "LÃ¶schen";
             isDeletingMode ? deleteBtn.classList.add('button-danger') : deleteBtn.classList.remove('button-danger');
             isDeletingMode ? deleteBtn.classList.remove('button-warning') : deleteBtn.classList.add('button-warning');
             updateUndoRedoButtons();
@@ -566,8 +566,8 @@
                         let tooltipText = `<b>Paket ${hoveredPacket.id}</b> (${hoveredPacket.protocol})<br>Status: ${hoveredPacket.status === 'traveling' ? 'Unterwegs' : 'Verarbeitung'}<br>`;
                         tooltipText += `Von: ${hoveredPacket.sourceIp} (${sourceDev?.hostname || '??'})<br>`;
                         tooltipText += `Nach: ${hoveredPacket.destinationIp} (${destDev?.hostname || '??'})<br>`;
-                        if (currentHopDev) tooltipText += `Akt. Hop: ${currentHopDev.hostname || `Gerät ${currentHopDev.id}`}<br>`;
-                        if (nextHopDev) tooltipText += `Nächst. Hop: ${nextHopDev.hostname || `Gerät ${nextHopDev.id}`}`;
+                        if (currentHopDev) tooltipText += `Akt. Hop: ${currentHopDev.hostname || `GerÃ¤t ${currentHopDev.id}`}<br>`;
+                        if (nextHopDev) tooltipText += `NÃ¤chst. Hop: ${nextHopDev.hostname || `GerÃ¤t ${nextHopDev.id}`}`;
                         showTooltip(tooltipText, event.clientX, event.clientY);
                         canvas.style.cursor = 'help'; onElement = true;
                     }
@@ -579,7 +579,7 @@
                          const fromDev = devices.find(d => d.id === hoveredConnection.fromDeviceId);
                          const toDev = devices.find(d => d.id === hoveredConnection.toDeviceId);
                          const typeName = Object.keys(connectionTypes).find(k => connectionTypes[k] === connectionTypes[hoveredConnection.type || 'ethernet']) || hoveredConnection.type || 'Ethernet';
-                         showTooltip(`Verbindung (${typeName})<br>Zwischen: ${fromDev?.hostname || `Gerät ${fromDev?.id}`} & ${toDev?.hostname || `Gerät ${toDev?.id}`}`, event.clientX, event.clientY);
+                         showTooltip(`Verbindung (${typeName})<br>Zwischen: ${fromDev?.hostname || `GerÃ¤t ${fromDev?.id}`} & ${toDev?.hostname || `GerÃ¤t ${toDev?.id}`}`, event.clientX, event.clientY);
                          canvas.style.cursor = isDeletingMode ? 'cell' : 'crosshair'; onElement = true;
                     }
                 }
@@ -610,7 +610,7 @@
             }
         });
         
-        // --- Kontextmenü Logik ---
+        // --- KontextmenÃ¼ Logik ---
         canvas.addEventListener('contextmenu', (event) => {
             event.preventDefault();
             const rect = canvas.getBoundingClientRect();
@@ -633,11 +633,11 @@
                     addContextMenuItem('Konfigurieren...', () => openDeviceConfigModal(item));
                     addContextMenuSeparator();
                 }
-                addContextMenuItem('Löschen', () => { deleteDevice(item); hideContextMenu(); });
+                addContextMenuItem('LÃ¶schen', () => { deleteDevice(item); hideContextMenu(); });
             } else if (type === 'connection') {
-                addContextMenuItem('Verbindungstyp ändern...', () => openConnectionConfigModal(item));
+                addContextMenuItem('Verbindungstyp Ã¤ndern...', () => openConnectionConfigModal(item));
                 addContextMenuSeparator();
-                addContextMenuItem('Löschen', () => { deleteConnection(item); hideContextMenu(); });
+                addContextMenuItem('LÃ¶schen', () => { deleteConnection(item); hideContextMenu(); });
             }
         }
 
@@ -665,7 +665,7 @@
             if (event.ctrlKey && event.key === 'y') { event.preventDefault(); redo(); }
         });
 
-        // --- Geräte und Verbindungskonfiguration Modals ---
+        // --- GerÃ¤te und Verbindungskonfiguration Modals ---
         function openDeviceConfigModal(device) {
             if (device.type === 'switch') return; 
             currentConfiguringDevice = device;
@@ -688,16 +688,16 @@
         document.getElementById('saveDeviceConfig').addEventListener('click', () => {
             if (currentConfiguringDevice) {
                 saveState(); 
-                const oldIp = currentConfiguringDevice.ipAddress; // Alte IP speichern für Router-Check
+                const oldIp = currentConfiguringDevice.ipAddress; // Alte IP speichern fÃ¼r Router-Check
                 currentConfiguringDevice.hostname = document.getElementById('deviceHostname').value.trim();
                 const newIp = document.getElementById('deviceIpAddress').value.trim();
                 const newMask = document.getElementById('deviceSubnetMask').value.trim();
 
                 if (!isValidIp(newIp)) {
-                    showMessage("Ungültiges IP-Adressformat.", 3000); return;
+                    showMessage("UngÃ¼ltiges IP-Adressformat.", 3000); return;
                 }
                 if (!isValidIp(newMask)) { 
-                    showMessage("Ungültiges Subnetzmaskenformat.", 3000); return;
+                    showMessage("UngÃ¼ltiges Subnetzmaskenformat.", 3000); return;
                 }
                 currentConfiguringDevice.ipAddress = newIp;
                 currentConfiguringDevice.subnetMask = newMask;
@@ -705,21 +705,21 @@
                 if (deviceProperties[currentConfiguringDevice.type].hasGateway) {
                     const newGateway = document.getElementById('deviceGateway').value.trim();
                     if (newGateway && !isValidIp(newGateway)) {
-                         showMessage("Ungültiges Gateway-IP-Format.", 3000); return;
+                         showMessage("UngÃ¼ltiges Gateway-IP-Format.", 3000); return;
                     }
                     currentConfiguringDevice.gateway = newGateway || null; 
                     currentConfiguringDevice.gatewayManuallySet = !!newGateway; 
                 }
                 
-                // Wenn Router IP geändert wurde, müssen evtl. Gateways von anderen Geräten angepasst werden
+                // Wenn Router IP geÃ¤ndert wurde, mÃ¼ssen evtl. Gateways von anderen GerÃ¤ten angepasst werden
                 if (currentConfiguringDevice.type === 'router' && oldIp !== newIp) {
                     devices.forEach(dev => {
                         if (deviceProperties[dev.type].hasGateway && dev.gateway === oldIp) {
-                           dev.gateway = null; // Altes Gateway ungültig machen
+                           dev.gateway = null; // Altes Gateway ungÃ¼ltig machen
                            dev.gatewayManuallySet = false;
                            attemptAutoSetGateway(dev, true); 
                         } else if (deviceProperties[dev.type].hasGateway) {
-                           attemptAutoSetGateway(dev, true); // Andere Geräte auch prüfen
+                           attemptAutoSetGateway(dev, true); // Andere GerÃ¤te auch prÃ¼fen
                         }
                     });
                 } else if (deviceProperties[currentConfiguringDevice.type].hasGateway) {
@@ -733,7 +733,7 @@
 
         function openConnectionConfigModal(connection) {
             currentConfiguringConnection = connection;
-            document.getElementById('connectionConfigTitle').textContent = `Verbindungstyp ändern`;
+            document.getElementById('connectionConfigTitle').textContent = `Verbindungstyp Ã¤ndern`;
             document.getElementById('connectionTypeSelect').value = connection.type || 'ethernet';
             connectionConfigModal.classList.add('active');
         }
@@ -768,7 +768,7 @@
                 connectionsCount: 0 
             };
             if (type === 'router' && deviceData.defaultIpPrefix === '192.168.1.') {
-                newDevice.ipAddress = '192.168.1.1'; // Standard IP für Router
+                newDevice.ipAddress = '192.168.1.1'; // Standard IP fÃ¼r Router
             }
             nextDeviceId++; devices.push(newDevice); 
             redrawCanvas();
@@ -795,7 +795,7 @@
                 return; 
             }
             
-            // Wenn forciert oder aktuelles Gateway ungültig ist
+            // Wenn forciert oder aktuelles Gateway ungÃ¼ltig ist
             if (forceCheck || !currentGatewayIsValid()) {
                 deviceToUpdate.gateway = null;
                 deviceToUpdate.gatewayManuallySet = false;
@@ -885,7 +885,7 @@
                     }
                 });
             }
-            showMessage(`${deviceProperties[deviceToDelete.type].label} ${deviceToDelete.hostname || deviceToDelete.id} gelöscht.`, 2000);
+            showMessage(`${deviceProperties[deviceToDelete.type].label} ${deviceToDelete.hostname || deviceToDelete.id} gelÃ¶scht.`, 2000);
             redrawCanvas();
         }
 
@@ -910,7 +910,7 @@
             if (dev1) attemptAutoSetGateway(dev1, true); // Force recheck
             if (dev2) attemptAutoSetGateway(dev2, true); // Force recheck
 
-            showMessage(`Verbindung zw. ${dev1?.hostname || `Gerät ${dev1?.id}`} & ${dev2?.hostname || `Gerät ${dev2?.id}`} gelöscht.`, 2000);
+            showMessage(`Verbindung zw. ${dev1?.hostname || `GerÃ¤t ${dev1?.id}`} & ${dev2?.hostname || `GerÃ¤t ${dev2?.id}`} gelÃ¶scht.`, 2000);
             redrawCanvas();
         }
 
@@ -918,11 +918,11 @@
             const clickedDevice = getDeviceAt(x,y);
             if(clickedDevice){
                 if (clickedDevice.type === 'switch') {
-                    showMessage("Pakete können nicht von/zu einem Switch gesendet werden (benötigt IP).", 2000);
+                    showMessage("Pakete kÃ¶nnen nicht von/zu einem Switch gesendet werden (benÃ¶tigt IP).", 2000);
                     packetSourceDevice = null; redrawCanvas(); return;
                 }
                 if (!clickedDevice.ipAddress || !clickedDevice.subnetMask) {
-                     showMessage(`Gerät ${clickedDevice.hostname || clickedDevice.id} hat keine vollständige IP-Konfiguration.`, 3000);
+                     showMessage(`GerÃ¤t ${clickedDevice.hostname || clickedDevice.id} hat keine vollstÃ¤ndige IP-Konfiguration.`, 3000);
                      packetSourceDevice = null; redrawCanvas(); return;
                 }
 
@@ -930,11 +930,11 @@
                     packetSourceDevice = clickedDevice;
                 } else {
                     if(packetSourceDevice.id === clickedDevice.id) {
-                        showMessage("Quelle und Ziel dürfen nicht identisch sein.", 2000);
+                        showMessage("Quelle und Ziel dÃ¼rfen nicht identisch sein.", 2000);
                         packetSourceDevice = null; redrawCanvas(); return;
                     }
                      if (!packetSourceDevice.ipAddress || !packetSourceDevice.subnetMask) {
-                        showMessage(`Quellgerät ${packetSourceDevice.hostname || packetSourceDevice.id} hat keine vollständige IP-Konfiguration.`, 3000);
+                        showMessage(`QuellgerÃ¤t ${packetSourceDevice.hostname || packetSourceDevice.id} hat keine vollstÃ¤ndige IP-Konfiguration.`, 3000);
                         packetSourceDevice = null; redrawCanvas(); return;
                     }
 
@@ -944,7 +944,7 @@
                     } else {
                        let errorMsg = `Kein Pfad von ${packetSourceDevice.hostname || packetSourceDevice.id} (${packetSourceDevice.ipAddress}) zu ${clickedDevice.hostname || clickedDevice.id} (${clickedDevice.ipAddress}) gefunden.`;
                        if (pathInfo && pathInfo.reason) errorMsg += ` Grund: ${pathInfo.reason}`;
-                       else errorMsg += " Überprüfen Sie IP-Konfigurationen, Gateways und Verbindungen.";
+                       else errorMsg += " ÃœberprÃ¼fen Sie IP-Konfigurationen, Gateways und Verbindungen.";
                        showMessage(errorMsg, 6000); 
                     }
                     packetSourceDevice = null;
@@ -1012,10 +1012,10 @@
         // --- Pfadfindung (BFS) mit IP-Routing-Logik ---
         function findPath(startNode, targetNode, allNodes, allLinks) {
             if (startNode.type === 'switch' || targetNode.type === 'switch') {
-                return { path: [], reason: "Start- oder Zielgerät ist ein Switch (Layer 2)." };
+                return { path: [], reason: "Start- oder ZielgerÃ¤t ist ein Switch (Layer 2)." };
             }
             if (!startNode.ipAddress || !startNode.subnetMask || !targetNode.ipAddress || !targetNode.subnetMask) {
-                return { path: [], reason: "Start- oder Zielgerät hat keine vollständige IP-Konfiguration." };
+                return { path: [], reason: "Start- oder ZielgerÃ¤t hat keine vollstÃ¤ndige IP-Konfiguration." };
             }
             if (startNode.id === targetNode.id) return { path: [startNode.id] };
 
@@ -1052,7 +1052,7 @@
                         }
                     } else {
                         if (!currentDevice.gateway || !isValidIp(currentDevice.gateway)) {
-                            // Gateway fehlt für Kommunikation ausserhalb des Subnetzes
+                            // Gateway fehlt fÃ¼r Kommunikation ausserhalb des Subnetzes
                             continue; 
                         }
                         // Finde Router, der Gateway IP entspricht UND im gleichen Subnetz ist
@@ -1072,7 +1072,7 @@
                     const neighbors = getNeighbors(currentDeviceId, allNodes, allLinks);
                     for (const neighbor of neighbors) {
                         if (currentArrPath.length > 1 && neighbor.id === currentArrPath[currentArrPath.length - 2]) {
-                            continue; // Nicht zurücksenden
+                            continue; // Nicht zurÃ¼cksenden
                         }
                         // Switch leitet weiter, wenn:
                         // 1. Nachbar ist Ziel UND Ziel ist im gleichen Subnetz wie Sender
@@ -1114,9 +1114,9 @@
 
             // Fehlergrund generieren, wenn kein Pfad gefunden
             if (startNode.type !== 'switch' && !areInSameSubnet(startNode, targetNode) && (!startNode.gateway || !isValidIp(startNode.gateway))) {
-                 return { path: [], reason: `"${startNode.hostname||startNode.id}" (${startNode.ipAddress}) benötigt ein (gültiges) Default Gateway, um das Subnetz von "${targetNode.hostname||targetNode.id}" (${targetNode.ipAddress}) zu erreichen. Bitte konfigurieren Sie ein Gateway für "${startNode.hostname||startNode.id}" (z.B. die IP eines Routers im Subnetz ${getNetworkAddress(startNode.ipAddress, startNode.subnetMask)}).` };
+                 return { path: [], reason: `"${startNode.hostname||startNode.id}" (${startNode.ipAddress}) benÃ¶tigt ein (gÃ¼ltiges) Default Gateway, um das Subnetz von "${targetNode.hostname||targetNode.id}" (${targetNode.ipAddress}) zu erreichen. Bitte konfigurieren Sie ein Gateway fÃ¼r "${startNode.hostname||startNode.id}" (z.B. die IP eines Routers im Subnetz ${getNetworkAddress(startNode.ipAddress, startNode.subnetMask)}).` };
             }
-            return { path: [], reason: "Keine logische Route gefunden. Überprüfen Sie IP-Adressen, Subnetzmasken, Gateways und Verbindungen." };
+            return { path: [], reason: "Keine logische Route gefunden. ÃœberprÃ¼fen Sie IP-Adressen, Subnetzmasken, Gateways und Verbindungen." };
         }
 
 
@@ -1178,7 +1178,7 @@
                         packet.progress = 1;
                         if (currentSegmentNextHopDevice.id === packet.finalDestinationDeviceId) {
                             packets.splice(i, 1);
-                            showMessage(`Paket ${packet.id} hat ${currentSegmentNextHopDevice.hostname || `Gerät ${currentSegmentNextHopDevice.id}`} erreicht!`, 2000);
+                            showMessage(`Paket ${packet.id} hat ${currentSegmentNextHopDevice.hostname || `GerÃ¤t ${currentSegmentNextHopDevice.id}`} erreicht!`, 2000);
                         } else {
                             packet.status = 'processing';
                             packet.processingTimer = packetProcessingTime;
@@ -1210,3 +1210,4 @@
     </script>
 </body>
 </html>
+
