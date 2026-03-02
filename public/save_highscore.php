@@ -9,13 +9,43 @@ $password = getenv('DB_PASSWORD') ?: '';
 
 // Create connection
 try {
+    // Determine database parameters, checking $_ENV, $_SERVER and getenv()
+    $host = $_ENV['DB_HOST'] ?? $_SERVER['DB_HOST'] ?? getenv('DB_HOST');
+    if (!$host) $host = '127.0.0.1'; // Use IP to force TCP over sockets which fails on Windows sometimes
+
+    $dbname = $_ENV['DB_NAME'] ?? $_SERVER['DB_NAME'] ?? getenv('DB_NAME');
+    if (!$dbname) $dbname = 'router_game';
+
+    $username = $_ENV['DB_USER'] ?? $_SERVER['DB_USER'] ?? getenv('DB_USER');
+    if (!$username) $username = 'root';
+
+    $password = $_ENV['DB_PASSWORD'] ?? $_SERVER['DB_PASSWORD'] ?? getenv('DB_PASSWORD');
+    if (!$password) $password = '';
+
+    // First connect WITHOUT database to create it if it doesn't exist
+    $pdoInit = new PDO("mysql:host=$host", $username, $password);
+    $pdoInit->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Create database and select it
+    $pdoInit->exec("CREATE DATABASE IF NOT EXISTS `$dbname`");
+    $pdoInit->exec("USE `$dbname`");
+    
+    // Create the highscore table if it doesn't exist
+    $pdoInit->exec("CREATE TABLE IF NOT EXISTS highscores (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        player_name VARCHAR(50) NOT NULL,
+        score INT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+
+    // Reassign PDO instance pointing to the newly guaranteed DB
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    // Set the PDO error mode to exception
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
 } catch(PDOException $e) {
     http_response_code(500);
     header('Content-Type: application/json');
-    echo json_encode(['status' => 'error', 'message' => 'Connection failed: ' . $e->getMessage()]);
+    echo json_encode(['status' => 'error', 'message' => 'Connection or Setup failed: ' . $e->getMessage()]);
     exit;
 }
 

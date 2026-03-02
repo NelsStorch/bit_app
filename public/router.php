@@ -1,9 +1,9 @@
 ﻿<!--
   Datei: router.php
   Beschreibung: Ein interaktives Lernspiel, bei dem Spieler IP-Pakete an die korrekten Ports
-  oder das Gateway leiten mÃ¼ssen. Es verwendet Canvas-Animationen und Soundeffekte.
+  oder das Gateway leiten müssen. Es verwendet Canvas-Animationen und Soundeffekte.
 
-  Technologien: HTML5, CSS3, JavaScript, Tone.js (fÃ¼r Audio), Tailwind CSS
+  Technologien: HTML5, CSS3, JavaScript, Tone.js (für Audio), Tailwind CSS
 -->
 <!DOCTYPE html>
 <html lang="de">
@@ -94,7 +94,7 @@
             position: relative;
         }
 
-        /* Schrauben fÃ¼r Rack-Optik */
+        /* Schrauben für Rack-Optik */
         .rack-device::before, .rack-device::after {
             content: ''; position: absolute; top: 50%; width: 8px; height: 8px;
             background: radial-gradient(circle, #aaa 20%, #555 100%);
@@ -115,8 +115,8 @@
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
-            justify-content: flex-start; /* LinksbÃ¼ndig fÃ¼r Switch-Look */
-            padding: 25px 30px 10px 30px; /* Platz fÃ¼r Rack-Ohren/Schrauben */
+            justify-content: flex-start; /* Linksbündig für Switch-Look */
+            padding: 25px 30px 10px 30px; /* Platz für Rack-Ohren/Schrauben */
         }
 
         /* Port Styling */
@@ -370,7 +370,7 @@
             <div class="rack-device">
                 <div class="device-label">CORE-ROUTER-X48</div>
                 <div id="ports-container">
-                    <!-- Ports werden hier dynamisch eingefÃ¼gt -->
+                    <!-- Ports werden hier dynamisch eingefügt -->
                 </div>
             </div>
 
@@ -436,7 +436,7 @@
     <!-- Overlays -->
     <div id="overlay-screen">
         <h1 class="text-5xl font-bold mb-4 text-blue-400">IP Router Master</h1>
-        <p class="text-xl mb-8 max-w-lg">Leite Pakete an den richtigen Port. Blockiere fehlerhafte oder bÃ¶sartige Pakete.</p>
+        <p class="text-xl mb-8 max-w-lg">Leite Pakete an den richtigen Port. Blockiere fehlerhafte oder bösartige Pakete.</p>
 
         <div id="start-content">
             <input type="text" id="player-name-input" placeholder="Spielername" class="p-3 rounded bg-gray-700 text-white text-center border border-gray-500 mb-4 w-64 block mx-auto focus:outline-none focus:border-blue-400">
@@ -469,7 +469,7 @@
             maxCombo: 8,
             basePacketInterval: 4000,
             baseDecisionTime: 10000,
-            portsPerRow: 12 // FÃ¼r das Rack-Layout
+            portsPerRow: 12 // Für das Rack-Layout
         };
 
         // --- DOM Elemente ---
@@ -627,7 +627,7 @@
         // --- Port Logic ---
 
         /**
-         * Erstellt das UI fÃ¼r die Ports im "Rack"-Design.
+         * Erstellt das UI für die Ports im "Rack"-Design.
          * Gruppiert Ports visuell, um hohe Portdichten darzustellen.
          */
         function createPortsUI() {
@@ -642,16 +642,16 @@
             ui.portsContainer.appendChild(gwWrapper);
 
             // Lokale Ports
-            // Wir erstellen BlÃ¶cke zu je 2 Ports Ã¼bereinander, wenn viele Ports da sind
-            // Oder einfache Reihen. FÃ¼r Switch-Look: Gruppen von 2/4/8.
+            // Wir erstellen Blöcke zu je 2 Ports übereinander, wenn viele Ports da sind
+            // Oder einfache Reihen. Für Switch-Look: Gruppen von 2/4/8.
 
             // Logik: Wir machen immer 2er Spalten (oben/unten) wie bei echten Switches
-            // Wenn count=4: 2 Spalten Ã  2 Ports.
+            // Wenn count=4: 2 Spalten Ü  2 Ports.
             const totalLocals = state.portCount;
 
             for (let i = 1; i <= totalLocals; i++) {
                 // Wir packen jeden Port in einen Wrapper, oder gruppieren sie?
-                // Simpler Ansatz fÃ¼r Responsiveness: Flex-Wrap mit einzelnen Ports,
+                // Simpler Ansatz für Responsiveness: Flex-Wrap mit einzelnen Ports,
                 // aber visuell eng gepackt.
 
                 const pWrapper = document.createElement('div');
@@ -708,7 +708,7 @@
         function generatePacket() {
             audio.play('packet');
 
-            // ZufÃ¤lliger Quell-Port (Simuliert eingehend)
+            // Zufälliger Quell-Port (Simuliert eingehend)
             const incomingPort = Math.floor(Math.random() * state.portCount) + 1;
 
             // Generiere IPs
@@ -721,8 +721,8 @@
             let targetPort;
 
             // 20% Chance auf Bad Packet (Spoofed IP, Blocked IP etc)
-            // FÃ¼r Vereinfachung: Bad Packet = IP von Blocklist oder Malformed (hier simuliert durch Zufall)
-            // Wir nutzen state.blockedIPs fÃ¼r "bekannte bÃ¶se IPs"
+            // Für Vereinfachung: Bad Packet = IP von Blocklist oder Malformed (hier simuliert durch Zufall)
+            // Wir nutzen state.blockedIPs für "bekannte böse IPs"
             let isBad = false;
 
             if (rand < 0.15 + (state.level * 0.02)) {
@@ -730,7 +730,7 @@
                 type = 'bad';
                 isBad = true;
                 destIP = generateRandomIP(); // Irgendwohin
-                // In hÃ¶heren Levels kÃ¶nnte hier Logik fÃ¼r "Spoofing" rein
+                // In höheren Levels könnte hier Logik für "Spoofing" rein
             } else if (rand < 0.4) {
                 // External (Internet)
                 type = 'external';
@@ -739,7 +739,7 @@
             } else {
                 // Internal (Local)
                 type = 'local';
-                // WÃ¤hle ein existierendes Subnetz
+                // Wähle ein existierendes Subnetz
                 const keys = Array.from(state.ipTable.keys());
                 const targetSubnet = keys[Math.floor(Math.random() * keys.length)];
                 destIP = `${targetSubnet}.${Math.floor(Math.random()*253)+1}`;
@@ -803,7 +803,7 @@
             let success = false;
 
             if (pkt.isBad) {
-                // Fehler: HÃ¤tte blockiert werden mÃ¼ssen
+                // Fehler: Hätte blockiert werden müssen
                 success = false;
             } else {
                 if (pkt.targetPort === portId) success = true;
@@ -990,7 +990,7 @@
 
                 ui.highscoreList.innerHTML = '';
                 if(data.length === 0) {
-                    ui.highscoreList.innerHTML = '<li>Keine EintrÃ¤ge.</li>';
+                    ui.highscoreList.innerHTML = '<li>Keine Einträge.</li>';
                     return;
                 }
 

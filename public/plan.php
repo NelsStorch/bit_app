@@ -1,7 +1,7 @@
 ﻿<!--
   Datei: plan.php
   Beschreibung: Ein webbasiertes Tool zum Erstellen von einfachen Netzwerkdiagrammen.
-  Benutzer kÃ¶nnen GerÃ¤te (PC, Router, Switch, etc.) per Drag & Drop platzieren, verbinden
+  Benutzer können Geräte (PC, Router, Switch, etc.) per Drag & Drop platzieren, verbinden
   und Pakete senden, um den Datenfluss zu simulieren.
 
   Technologien: HTML5 Canvas, JavaScript, Tailwind CSS
@@ -60,7 +60,7 @@
             text-align: center;
             line-height: 1;
         }
-        /* Tooltip fÃ¼r GerÃ¤te-Infos */
+        /* Tooltip für Geräte-Infos */
         .tooltip {
             position: absolute;
             background-color: #333;
@@ -73,7 +73,7 @@
             transition: opacity 0.2s;
             z-index: 1000;
         }
-        /* Overlay fÃ¼r Nachrichten/Fehler */
+        /* Overlay für Nachrichten/Fehler */
         .message-overlay {
             position: absolute;
             top: 20px;
@@ -100,37 +100,37 @@
              <span class="text-xs mt-1">Home</span>
         </a>
         <div class="w-px h-10 bg-gray-300 mx-2"></div>
-        <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufÃ¼gen">
+        <div id="addPc" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="PC hinzufügen">
             <div class="device-icon">ðŸ’»</div>
             <span class="text-xs mt-1">PC</span>
         </div>
-        <div id="addLaptop" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Laptop hinzufÃ¼gen">
+        <div id="addLaptop" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Laptop hinzufügen">
             <div class="device-icon">ðŸ–¥ï¸</div> <span class="text-xs mt-1">Laptop</span>
         </div>
-        <div id="addRouter" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Router hinzufÃ¼gen">
+        <div id="addRouter" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Router hinzufügen">
             <div class="device-icon">ðŸŒ</div>
             <span class="text-xs mt-1">Router</span>
         </div>
-        <div id="addSwitch" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Switch hinzufÃ¼gen">
+        <div id="addSwitch" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Switch hinzufügen">
             <div class="device-icon">â†”ï¸</div>
             <span class="text-xs mt-1">Switch</span>
         </div>
-        <div id="addServer" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Server hinzufÃ¼gen">
+        <div id="addServer" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Server hinzufügen">
             <div class="device-icon">ðŸ—„ï¸</div>
             <span class="text-xs mt-1">Server</span>
         </div>
-        <div id="addInternet" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Internet hinzufÃ¼gen">
+        <div id="addInternet" class="toolbar-item p-2 border rounded-lg flex flex-col items-center" title="Internet hinzufügen">
             <div class="device-icon">â˜ï¸</div>
             <span class="text-xs mt-1">Internet</span>
         </div>
         <div class="flex-grow"></div>
         <button id="connectMode" class="button-std button-secondary">Verbindungsmodus</button>
         <button id="packetSendMode" class="button-std button-secondary">Paket senden</button>
-        <button id="deleteMode" class="button-std button-warning">LÃ¶schen</button>
-        <button id="clearCanvas" class="button-std button-danger">ArbeitsflÃ¤che leeren</button>
+        <button id="deleteMode" class="button-std button-warning">Löschen</button>
+        <button id="clearCanvas" class="button-std button-danger">Arbeitsfläche leeren</button>
     </div>
 
-    <!-- ZeichenflÃ¤che -->
+    <!-- Zeichenfläche -->
     <div class="flex-grow p-2 relative" id="canvasContainer">
         <canvas id="networkCanvas"></canvas>
         <div id="messageOverlay" class="message-overlay"></div>
@@ -197,7 +197,7 @@
             tooltipElement.style.opacity = '0';
         }
 
-        /** Zeigt eine temporÃ¤re Nachricht oben im Canvas an */
+        /** Zeigt eine temporäre Nachricht oben im Canvas an */
         function showMessage(message, duration = 3500) {
             messageOverlay.textContent = message;
             messageOverlay.style.display = 'block';
@@ -206,7 +206,7 @@
             }, duration);
         }
 
-        /** Passt die Canvas-GrÃ¶sse an den Container an */
+        /** Passt die Canvas-Grösse an den Container an */
         function resizeCanvas() {
             canvas.width = canvasContainer.clientWidth;
             canvas.height = canvasContainer.clientHeight;
@@ -217,8 +217,8 @@
         // --- Zeichenfunktionen ---
 
         /**
-         * Zeichnet ein GerÃ¤t auf dem Canvas.
-         * @param {Object} device - Das zu zeichnende GerÃ¤t-Objekt.
+         * Zeichnet ein Gerät auf dem Canvas.
+         * @param {Object} device - Das zu zeichnende Gerät-Objekt.
          */
         function drawDevice(device) {
             ctx.font = `${deviceFontSize}px Arial`;
@@ -251,7 +251,7 @@
             ctx.fillText(labelText, device.x, device.y + (device.height / 2) - (labelFontSize / 2) - 4);
         }
 
-        /** Zeichnet eine Verbindungslinie zwischen zwei GerÃ¤ten */
+        /** Zeichnet eine Verbindungslinie zwischen zwei Geräten */
         function drawConnection(connection) {
             const fromDevice = devices.find(d => d.id === connection.fromDeviceId);
             const toDevice = devices.find(d => d.id === connection.toDeviceId);
@@ -290,7 +290,7 @@
             devices.forEach(drawDevice);
             packets.forEach(drawPacket);
 
-            // Visualisierung fÃ¼r Verbindungsmodus (Linie ziehen) oder Paketmodus (Quelle markieren)
+            // Visualisierung für Verbindungsmodus (Linie ziehen) oder Paketmodus (Quelle markieren)
             if (isConnecting && firstDeviceForConnection) {
                 ctx.beginPath();
                 ctx.arc(firstDeviceForConnection.x, firstDeviceForConnection.y, (firstDeviceForConnection.width || deviceProperties[firstDeviceForConnection.type].baseWidth) / 2 + 5, 0, 2 * Math.PI);
@@ -307,7 +307,7 @@
             }
         }
 
-        // --- Event Listener fÃ¼r Toolbar ---
+        // --- Event Listener für Toolbar ---
         document.getElementById('addPc').addEventListener('click', () => setDeviceType('pc'));
         document.getElementById('addLaptop').addEventListener('click', () => setDeviceType('laptop'));
         document.getElementById('addRouter').addEventListener('click', () => setDeviceType('router'));
@@ -319,7 +319,7 @@
         document.getElementById('packetSendMode').addEventListener('click', togglePacketSendMode);
         document.getElementById('deleteMode').addEventListener('click', toggleDeleteMode);
         document.getElementById('clearCanvas').addEventListener('click', () => {
-            if (confirm('MÃ¶chten Sie die ArbeitsflÃ¤che wirklich leeren? Alle Elemente gehen verloren.')) {
+            if (confirm('Möchten Sie die Arbeitsfläche wirklich leeren? Alle Elemente gehen verloren.')) {
                 devices = []; connections = []; packets = [];
                 nextDeviceId = 0; nextPacketId = 0;
                 isConnecting = false; firstDeviceForConnection = null;
@@ -350,7 +350,7 @@
             isSendingPacketMode ? packetSendBtn.classList.remove('button-secondary') : packetSendBtn.classList.add('button-secondary');
 
             const deleteBtn = document.getElementById('deleteMode');
-            deleteBtn.textContent = isDeletingMode ? "LÃ¶schen (aktiv)" : "LÃ¶schen";
+            deleteBtn.textContent = isDeletingMode ? "Löschen (aktiv)" : "Löschen";
             isDeletingMode ? deleteBtn.classList.add('button-danger') : deleteBtn.classList.remove('button-danger');
             isDeletingMode ? deleteBtn.classList.remove('button-warning') : deleteBtn.classList.add('button-warning');
         }
@@ -457,7 +457,7 @@
                 if(!onDevice && !onPacket && isDeletingMode) {
                     const hoveredConnection = getConnectionAt(mouseX, mouseY);
                     if(hoveredConnection){
-                         showTooltip(`Verbindung zwischen GerÃ¤t ${hoveredConnection.fromDeviceId} und ${hoveredConnection.toDeviceId}`, event.clientX, event.clientY);
+                         showTooltip(`Verbindung zwischen Gerät ${hoveredConnection.fromDeviceId} und ${hoveredConnection.toDeviceId}`, event.clientX, event.clientY);
                          canvas.style.cursor = 'cell';
                          onConnection = true;
                     }
@@ -487,10 +487,10 @@
         // --- Logik-Funktionen ---
 
         /**
-         * FÃ¼gt ein neues GerÃ¤t hinzu.
+         * Fügt ein neues Gerät hinzu.
          * @param {number} x - X-Koordinate.
          * @param {number} y - Y-Koordinate.
-         * @param {string} type - Typ des GerÃ¤ts (pc, router, etc.).
+         * @param {string} type - Typ des Geräts (pc, router, etc.).
          */
         function addDevice(x, y, type) {
             const deviceData = deviceProperties[type];
@@ -526,7 +526,7 @@
                     if (firstDeviceForConnection.id !== clickedDevice.id &&
                         !connectionExists(firstDeviceForConnection.id, clickedDevice.id)) {
                         
-                        // Port-Limits prÃ¼fen
+                        // Port-Limits prüfen
                         const firstDeviceProps = deviceProperties[firstDeviceForConnection.type];
                         const clickedDeviceProps = deviceProperties[clickedDevice.type];
 
@@ -556,25 +556,25 @@
         function handleDeleteClick(x, y) {
             const clickedDevice = getDeviceAt(x, y);
             if (clickedDevice) {
-                // GerÃ¤t lÃ¶schen
+                // Gerät löschen
                 devices = devices.filter(d => d.id !== clickedDevice.id);
-                // ZugehÃ¶rige Verbindungen lÃ¶schen
+                // Zugehörige Verbindungen löschen
                 const oldConnectionsCount = connections.length;
                 connections = connections.filter(conn => conn.fromDeviceId !== clickedDevice.id && conn.toDeviceId !== clickedDevice.id);
-                // ZugehÃ¶rige Pakete lÃ¶schen
+                // Zugehörige Pakete löschen
                 packets = packets.filter(p => !p.path.includes(clickedDevice.id));
 
-                showMessage(`${deviceProperties[clickedDevice.type].label} ${clickedDevice.id} und zugehÃ¶rige Verbindungen/Pakete gelÃ¶scht.`, 2000);
+                showMessage(`${deviceProperties[clickedDevice.type].label} ${clickedDevice.id} und zugehörige Verbindungen/Pakete gelöscht.`, 2000);
 
             } else {
-                // Verbindung lÃ¶schen, falls kein GerÃ¤t geklickt wurde
+                // Verbindung löschen, falls kein Gerät geklickt wurde
                 const clickedConnection = getConnectionAt(x, y);
                 if (clickedConnection) {
                     connections = connections.filter(conn =>
                         !( (conn.fromDeviceId === clickedConnection.fromDeviceId && conn.toDeviceId === clickedConnection.toDeviceId) ||
                            (conn.fromDeviceId === clickedConnection.toDeviceId && conn.toDeviceId === clickedConnection.fromDeviceId) )
                     );
-                     // Pakete auf diesem Segment lÃ¶schen
+                     // Pakete auf diesem Segment löschen
                     packets = packets.filter(packet => {
                         const sourceId = packet.path[packet.pathIndex];
                         const nextHopId = packet.path[packet.pathIndex + 1];
@@ -582,7 +582,7 @@
                                                   (sourceId === clickedConnection.toDeviceId && nextHopId === clickedConnection.fromDeviceId);
                         return !isPacketOnSegment;
                     });
-                    showMessage(`Verbindung zwischen GerÃ¤t ${clickedConnection.fromDeviceId} und ${clickedConnection.toDeviceId} gelÃ¶scht.`, 2000);
+                    showMessage(`Verbindung zwischen Gerät ${clickedConnection.fromDeviceId} und ${clickedConnection.toDeviceId} gelöscht.`, 2000);
                 }
             }
             redrawCanvas();
@@ -596,7 +596,7 @@
                     packetSourceDevice = clickedDevice;
                 } else {
                     if(packetSourceDevice.id === clickedDevice.id) {
-                        showMessage("Quelle und Ziel dÃ¼rfen nicht identisch sein.", 2000);
+                        showMessage("Quelle und Ziel dürfen nicht identisch sein.", 2000);
                         packetSourceDevice = null;
                         redrawCanvas();
                         return;
@@ -607,7 +607,7 @@
                     if(pathDeviceIds && pathDeviceIds.length > 0){
                         createPacket(packetSourceDevice, clickedDevice, pathDeviceIds);
                     } else {
-                       showMessage(`Kein gÃ¼ltiger Pfad von ${deviceProperties[packetSourceDevice.type].label} ${packetSourceDevice.id} zu ${deviceProperties[clickedDevice.type].label} ${clickedDevice.id} gefunden.`);
+                       showMessage(`Kein gültiger Pfad von ${deviceProperties[packetSourceDevice.type].label} ${packetSourceDevice.id} zu ${deviceProperties[clickedDevice.type].label} ${clickedDevice.id} gefunden.`);
                     }
                     packetSourceDevice = null;
                 }
@@ -703,12 +703,12 @@
         }
 
         /**
-         * Findet einen Pfad zwischen zwei GerÃ¤ten (BFS).
-         * @param {Object} startDevice - StartgerÃ¤t.
-         * @param {Object} endDevice - ZielgerÃ¤t.
-         * @param {Array} allDevices - Liste aller GerÃ¤te.
+         * Findet einen Pfad zwischen zwei Geräten (BFS).
+         * @param {Object} startDevice - Startgerät.
+         * @param {Object} endDevice - Zielgerät.
+         * @param {Array} allDevices - Liste aller Geräte.
          * @param {Array} allConnections - Liste aller Verbindungen.
-         * @returns {Array|null} Array von GerÃ¤te-IDs oder null, wenn kein Pfad gefunden.
+         * @returns {Array|null} Array von Geräte-IDs oder null, wenn kein Pfad gefunden.
          */
         function findPath(startDevice, endDevice, allDevices, allConnections) {
             if (!startDevice || !endDevice || startDevice.id === endDevice.id) return null;
@@ -740,7 +740,7 @@
                         if (!visitedPaths.has(neighborDevice.id)) { 
                             let canHopToNeighbor = true;
 
-                            // Einfache Regeln fÃ¼r Internet/Router Verbindung
+                            // Einfache Regeln für Internet/Router Verbindung
                             if (currentDevice.type === 'internet' && neighborDevice.type !== 'router') {
                                 canHopToNeighbor = false;
                             }
@@ -804,7 +804,7 @@
                 const currentSegmentNextHopDevice = devices.find(d => d.id === packet.path[packet.pathIndex + 1]);
 
                 if (!currentSegmentSourceDevice || !currentSegmentNextHopDevice) {
-                    console.warn(`Paket ${packet.id} hat ungÃ¼ltiges Segment, wird entfernt.`);
+                    console.warn(`Paket ${packet.id} hat ungültiges Segment, wird entfernt.`);
                     packets.splice(i, 1);
                     continue;
                 }
@@ -854,7 +854,7 @@
         function animatePackets() {
             updatePackets();
             redrawCanvas();
-            // Animation lÃ¤uft weiter, solange Pakete da sind oder Interaktion stattfindet
+            // Animation läuft weiter, solange Pakete da sind oder Interaktion stattfindet
             if (packets.length > 0 || isConnecting || isSendingPacketMode || isDeletingMode || selectedDeviceType) {
                 animationFrameId = requestAnimationFrame(animatePackets);
             } else {

@@ -1,9 +1,9 @@
 ﻿<!--
   Datei: router.php
   Beschreibung: Ein interaktives Lernspiel, bei dem Spieler IP-Pakete an die korrekten Ports
-  oder das Gateway leiten mÃ¼ssen. Es verwendet Canvas-Animationen und Soundeffekte.
+  oder das Gateway leiten müssen. Es verwendet Canvas-Animationen und Soundeffekte.
 
-  Technologien: HTML5, CSS3, JavaScript, Tone.js (fÃ¼r Audio), Tailwind CSS
+  Technologien: HTML5, CSS3, JavaScript, Tone.js (für Audio), Tailwind CSS
 -->
 <!DOCTYPE html>
 <html lang="de">
@@ -29,9 +29,9 @@
             --primary-accent: #0984e3;
             --primary-accent-dark: #005cb2;
             --success-green: #00b894;
-            --warning-orange: #fdcb6e; /* Verwendet fÃ¼r Combo */
+            --warning-orange: #fdcb6e; /* Verwendet für Combo */
             --danger-red: #d63031;
-            --info-purple: #a29bfe; /* Farbe fÃ¼r Gateway-Pakete */
+            --info-purple: #a29bfe; /* Farbe für Gateway-Pakete */
             --white: #ffffff;
         }
 
@@ -202,7 +202,7 @@
           @keyframes pulse-red { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.03); } }
 
         /* Animiertes Paket */
-        #animated-packet { /* Styling fÃ¼r das fliegende Paket */ }
+        #animated-packet { /* Styling für das fliegende Paket */ }
          #animated-packet > svg { width: 18px; height: 18px; }
         #animated-packet.visible { opacity: 1; }
         #animated-packet.blocked { /* Styling wenn blockiert */ }
@@ -254,7 +254,7 @@
         <!-- Overlays -->
         <div id="start-screen">
             <h2>IP Router Spiel</h2>
-            <p>Leite Pakete zum richtigen Port oder Gateway. Blockiere bÃ¶se Pakete und erreiche den Highscore!</p>
+            <p>Leite Pakete zum richtigen Port oder Gateway. Blockiere böse Pakete und erreiche den Highscore!</p>
             <button class="start-button">Spiel starten</button>
         </div>
         <div id="game-over-screen" class="hidden-overlay">
@@ -306,7 +306,7 @@
             errorTimestamp: [], // Um Game Over bei zu vielen Fehlern in kurzer Zeit zu erkennen
             maxErrorsInWindow: 3,
             errorWindowTime: 20000,
-            badPacketChance: 0.3, // Wahrscheinlichkeit fÃ¼r bÃ¶se Pakete
+            badPacketChance: 0.3, // Wahrscheinlichkeit für böse Pakete
             blockedIPs: new Set(),
             nextNetworkSuffix: 1,
             combo: 1,
@@ -331,10 +331,10 @@
             } catch (error) { console.error("Tone.js error:", error); }
         }
 
-        // --- Hilfsfunktionen fÃ¼r IP-Logik ---
+        // --- Hilfsfunktionen für IP-Logik ---
 
         /**
-         * Generiert eine IP-Adresse fÃ¼r ein bestimmtes Netzwerk.
+         * Generiert eine IP-Adresse für ein bestimmtes Netzwerk.
          * @param {number} networkSuffix - Das dritte Oktett der IP (192.168.X.0).
          * @param {number} hostPart - Das vierte Oktett (Host).
          * @returns {string} Die generierte IP-Adresse.
@@ -343,7 +343,7 @@
 
         /**
          * Bestimmt das Netzwerk (CIDR) aus einer IP-Adresse.
-         * @param {string} ip - Die zu prÃ¼fende IP-Adresse.
+         * @param {string} ip - Die zu prüfende IP-Adresse.
          * @returns {string|null} Das Netzwerk (z.B. '192.168.1.0/24') oder 'external'.
          */
         function getNetworkFromIP(ip) {
@@ -384,7 +384,7 @@
         function levelUp() {
             playSound('levelup'); gameState.level++; levelDisplay.textContent = `Level: ${gameState.level}`;
             if (gameState.ports < 12 || (gameState.ports < 32 && gameState.level % 2 === 0)) { addPort(); }
-            // Schwierigkeit erhÃ¶hen
+            // Schwierigkeit erhöhen
             gameState.packetInterval = Math.max(1500, gameState.packetInterval - 400);
             gameState.decisionTime = Math.max(4000, gameState.decisionTime - 500);
             gameState.badPacketChance = Math.min(0.4, gameState.badPacketChance + 0.90);
@@ -429,8 +429,8 @@
 
         /**
          * Generiert ein neues Spiel-Paket.
-         * Erstellt zufÃ¤llige Quell- und Ziel-IPs und bestimmt den korrekten Zielport.
-         * Kann auch "bÃ¶se" Pakete generieren, die blockiert werden mÃ¼ssen.
+         * Erstellt zufällige Quell- und Ziel-IPs und bestimmt den korrekten Zielport.
+         * Kann auch "böse" Pakete generieren, die blockiert werden müssen.
          */
         function generatePacket() {
              if (!gameState.gameActive) return;
@@ -444,13 +444,13 @@
             let isBadPacket = false;
             let destNetwork = getNetworkFromIP(destIP);
 
-            // 1. PrÃ¼fen ob Source IP blockiert ist
+            // 1. Prüfen ob Source IP blockiert ist
             if (gameState.blockedIPs.has(srcIP) && Math.random() < gameState.badPacketChance) {
                 isBadPacket = true;
                 packetType = 'bad';
                 targetPort = null; // Ziel ist Blockieren
             } else {
-                // 2. PrÃ¼fen des Ziel-Netzwerks
+                // 2. Prüfen des Ziel-Netzwerks
                 if (destNetwork === 'external') {
                     packetType = 'external';
                     targetPort = GATEWAY_PORT_NUMBER;
@@ -460,7 +460,7 @@
                         targetPort = gameState.ipTable.get(destNetwork);
                     } else {
                         // Unbekanntes lokales Netz -> Gateway
-                        console.warn(`Packet fÃ¼r unbekanntes lokales Netz ${destNetwork}, Routing zu Gateway.`);
+                        console.warn(`Packet für unbekanntes lokales Netz ${destNetwork}, Routing zu Gateway.`);
                         packetType = 'external';
                         targetPort = GATEWAY_PORT_NUMBER;
                     }
@@ -477,7 +477,7 @@
             let icon = 'â“'; let iconColorClass = ''; let typeText = '';
             switch (packet.type) {
                 case 'external': icon = 'â˜ï¸'; iconColorClass = 'external'; typeText = ' (-> Gateway)'; break;
-                case 'bad': icon = 'ðŸ’€'; iconColorClass = 'bad'; typeText = ' (BÃ¶ses Paket!)'; break;
+                case 'bad': icon = 'ðŸ’€'; iconColorClass = 'bad'; typeText = ' (Böses Paket!)'; break;
                 case 'normal': icon = 'ðŸ’»'; break;
             }
             incomingPacketDiv.innerHTML = `
@@ -510,7 +510,7 @@
             let correctAction = false;
             let targetPortElement = document.querySelector(`.port[data-port="${clickedPortNumber}"]`);
 
-            // Korrekt, wenn Paket 'normal'/'external' ist UND Zielport Ã¼bereinstimmt
+            // Korrekt, wenn Paket 'normal'/'external' ist UND Zielport übereinstimmt
             if ((packet.type === 'normal' && packet.targetPort === clickedPortNumber) ||
                 (packet.type === 'external' && clickedPortNumber === GATEWAY_PORT_NUMBER)) {
                  correctAction = true;
@@ -545,7 +545,7 @@
 
                 clearIncomingPacket();
                  clearTimeout(gameState.packetTimer);
-                 gameState.packetTimer = setTimeout(generatePacket, Math.max(800, gameState.packetInterval * 0.8)); // Schnelleres nÃ¤chstes Paket
+                 gameState.packetTimer = setTimeout(generatePacket, Math.max(800, gameState.packetInterval * 0.8)); // Schnelleres nächstes Paket
 
             } else { // Falsche Aktion
                  incomingPacketDiv.parentElement.classList.add('shake-error');
@@ -554,7 +554,7 @@
                  clearTimeout(gameState.packetTimer);
                  gameState.packetTimer = setTimeout(() => {
                      clearIncomingPacket(true);
-                     gameState.packetTimer = setTimeout(generatePacket, gameState.packetInterval); // Normale VerzÃ¶gerung nach Fehler
+                     gameState.packetTimer = setTimeout(generatePacket, gameState.packetInterval); // Normale Verzögerung nach Fehler
                  }, 1500);
             }
 
@@ -594,7 +594,7 @@
              gameState.blockedIPs.clear(); gameState.nextNetworkSuffix = 1; gameState.combo = 1;
              clearTimeout(gameState.packetTimer); clearInterval(gameState.decisionTimerInterval);
 
-             // Initiale Netzwerke erstellen und Routen hinzufÃ¼gen
+             // Initiale Netzwerke erstellen und Routen hinzufügen
              for(let i = 1; i <= gameState.ports; i++) {
                  const network = `192.168.${gameState.nextNetworkSuffix}.0/24`;
                  gameState.ipTable.set(network, i);

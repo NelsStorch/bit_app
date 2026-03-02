@@ -1,7 +1,7 @@
 ﻿<!--
   Datei: netzwerk.php
-  Beschreibung: Eine interaktive Schritt-fÃ¼r-Schritt Simulation eines Webseitenaufrufs.
-  Der Benutzer lernt die AblÃ¤ufe von DNS, TCP, TLS und HTTP kennen.
+  Beschreibung: Eine interaktive Schritt-für-Schritt Simulation eines Webseitenaufrufs.
+  Der Benutzer lernt die Abläufe von DNS, TCP, TLS und HTTP kennen.
 
   Technologien: HTML5, Tailwind CSS, JavaScript (Animationen)
 -->
@@ -150,7 +150,7 @@
 <body class="flex flex-col h-screen">
 
     <header class="p-3 bg-stadt-blue text-white flex items-center space-x-3 flex-shrink-0 shadow-md">
-        <a href="index.html" class="hover:text-gray-200 transition-colors mr-2" title="ZurÃ¼ck zur Startseite">
+        <a href="index.html" class="hover:text-gray-200 transition-colors mr-2" title="Zurück zur Startseite">
             <i class="fas fa-home text-xl"></i>
         </a>
         <svg class="w-7 h-7" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="white"> <path d="M50,5 L95,27.5 L95,72.5 L50,95 L5,72.5 L5,27.5 Z M50,15 L85,32.5 v35 L50,85 L15,67.5 v-35 Z M50,25 L75,37.5 v25 L50,75 L25,62.5 v-25 Z"/>
@@ -166,7 +166,7 @@
 
             <div class="md:col-span-2 space-y-2 overflow-y-auto pr-2">
                 <p class="text-gray-700 text-sm">Was passiert zuerst? Klicke auf den richtigen Schritt.</p>
-                <div id="feedback" class="p-2 rounded-md border text-center font-medium">WÃ¤hle den ersten Schritt!</div>
+                <div id="feedback" class="p-2 rounded-md border text-center font-medium">Wähle den ersten Schritt!</div>
                 <div id="simulationSteps" class="space-y-2"></div>
                 <p id="completionMessage" class="mt-4 text-green-600 font-semibold hidden text-center">Super! Simulation abgeschlossen!</p>
             </div>
@@ -201,7 +201,7 @@
 
         // Define steps with slower durations and server actions
         const stepsData = [
-            { id: 'dns', title: 'DNS-AuflÃ¶sung', description: 'IP-Adresse finden.', details: ['Cache?', '-> Resolver', 'Resolver -> Root', 'Root -> .ch', '.ch -> Stadt ZH', 'IP erhalten!'], correct: false, element: null, buttonElement: null, detailsElement: null,
+            { id: 'dns', title: 'DNS-Auflösung', description: 'IP-Adresse finden.', details: ['Cache?', '-> Resolver', 'Resolver -> Root', 'Root -> .ch', '.ch -> Stadt ZH', 'IP erhalten!'], correct: false, element: null, buttonElement: null, detailsElement: null,
               animationSequence: [
                 { from: 'client', to: 'resolver', duration: 1500, type: 'request', content: 'DNS Query?' },
                 { from: 'resolver', to: 'root-dns', duration: 1000, type: 'request', content: '?', actionText: 'Frage Root...' }, // Action text added
@@ -209,23 +209,23 @@
                 { from: 'resolver', to: 'tld-dns', duration: 1000, type: 'request', content: '?', actionText: 'Frage .ch...' },
                 { from: 'tld-dns', to: 'resolver', duration: 1000, type: 'response', content: 'StadtZH DNS', actionText: 'Verweise zu StadtZH' },
                 { from: 'resolver', to: 'auth-dns', duration: 1200, type: 'request', content: '?', actionText: 'Frage StadtZH...' },
-                { from: 'auth-dns', to: 'resolver', duration: 1200, type: 'response', content: 'IP Addr', actionText: 'Gebe IP zurÃ¼ck' },
+                { from: 'auth-dns', to: 'resolver', duration: 1200, type: 'response', content: 'IP Addr', actionText: 'Gebe IP zurück' },
                 { from: 'resolver', to: 'client', duration: 1500, type: 'response', content: 'IP Addr', actionText: 'Sende IP zu Client' },
               ]
             },
             { id: 'tcp', title: 'TCP-Verbindung', description: 'Stabile Verbindung aufbauen.', details: ['SYN', 'SYN-ACK', 'ACK', 'Verbunden!'], correct: false, element: null, buttonElement: null, detailsElement: null,
               animationSequence: [
                 { from: 'client', to: 'webserver', duration: 1500, type: 'request', content: 'SYN' },
-                { from: 'webserver', to: 'client', duration: 1500, type: 'response', content: 'SYN-ACK', actionText: 'BestÃ¤tige SYN' },
+                { from: 'webserver', to: 'client', duration: 1500, type: 'response', content: 'SYN-ACK', actionText: 'Bestätige SYN' },
                 { from: 'client', to: 'webserver', duration: 1500, type: 'request', content: 'ACK' },
               ]
             },
-            { id: 'tls', title: 'Sichere Verbindung (TLS)', description: 'Verbindung verschlÃ¼sseln.', details: ['Client Hello', 'Server Hello+Cert', 'PrÃ¼fung', 'SchlÃ¼ssel', 'Sicher!'], correct: false, element: null, buttonElement: null, detailsElement: null,
+            { id: 'tls', title: 'Sichere Verbindung (TLS)', description: 'Verbindung verschlüsseln.', details: ['Client Hello', 'Server Hello+Cert', 'Prüfung', 'Schlüssel', 'Sicher!'], correct: false, element: null, buttonElement: null, detailsElement: null,
               animationSequence: [
                  { from: 'client', to: 'webserver', duration: 1500, type: 'request', content: 'Hello' },
                  { from: 'webserver', to: 'client', duration: 1500, type: 'response', content: 'Cert', actionText: 'Sende Zertifikat' },
-                 { from: 'client', to: 'webserver', duration: 1000, type: 'request', content: 'Key Exch', actionText: 'PrÃ¼fe Cert...' }, // Client "action"
-                 { from: 'webserver', to: 'client', duration: 1000, type: 'response', content: 'OK', actionText: 'VerschlÃ¼sselung OK' },
+                 { from: 'client', to: 'webserver', duration: 1000, type: 'request', content: 'Key Exch', actionText: 'Prüfe Cert...' }, // Client "action"
+                 { from: 'webserver', to: 'client', duration: 1000, type: 'response', content: 'OK', actionText: 'Verschlüsselung OK' },
               ]
             },
             { id: 'http-req', title: 'HTTP-Anfrage', description: 'Webseite anfordern.', details: ['GET /', 'Host: ...', 'Gesendet.'], correct: false, element: null, buttonElement: null, detailsElement: null,
@@ -238,7 +238,7 @@
                  { from: 'webserver', to: 'client', duration: 1800, type: 'response', content: 'HTML...', actionText: 'Sende Webseite' }
               ]
             },
-            { id: 'render', title: 'Webseite darstellen', description: 'Seite anzeigen.', details: ['HTML lesen', 'CSS anwenden', 'JS ausfÃ¼hren', 'Fertig!'], correct: false, element: null, buttonElement: null, detailsElement: null,
+            { id: 'render', title: 'Webseite darstellen', description: 'Seite anzeigen.', details: ['HTML lesen', 'CSS anwenden', 'JS ausführen', 'Fertig!'], correct: false, element: null, buttonElement: null, detailsElement: null,
               animationSequence: []
             }
         ];
@@ -274,7 +274,7 @@
         }
 
         /**
-         * Zeigt einen Aktionstext Ã¼ber einem Knoten an.
+         * Zeigt einen Aktionstext über einem Knoten an.
          * @param {string} nodeId - Die ID des Knotens.
          * @param {string} text - Der anzuzeigende Text.
          */
@@ -305,7 +305,7 @@
          * @param {string} type - Typ des Pakets ('request' oder 'response').
          * @param {string} content - Textinhalt des Pakets.
          * @param {string} actionText - Optionaler Text, der beim Start angezeigt wird.
-         * @returns {Promise} Ein Promise, das nach Abschluss der Animation aufgelÃ¶st wird.
+         * @returns {Promise} Ein Promise, das nach Abschluss der Animation aufgelöst wird.
          */
         function animatePacket(fromId, toId, duration, type = 'request', content = '', actionText = '') {
             return new Promise(resolve => {
@@ -419,7 +419,7 @@
                 } else {
                      // Add a slight delay before showing the next prompt to avoid overlap with hiding action text
                      setTimeout(() => {
-                        showFeedback(`Was passiert als NÃ¤chstes? (Schritt ${currentCorrectStepIndex + 1})`, 'info');
+                        showFeedback(`Was passiert als Nächstes? (Schritt ${currentCorrectStepIndex + 1})`, 'info');
                      }, 600);
                 }
 
@@ -427,7 +427,7 @@
                  showFeedback(`Schritt "${clickedStep.title}" ist bereits erledigt.`, 'info');
             }
             else {
-                showFeedback(`"${clickedStep.title}" ist noch nicht der richtige Schritt. Ãœberlege nochmal!`, 'error');
+                showFeedback(`"${clickedStep.title}" ist noch nicht der richtige Schritt. Überlege nochmal!`, 'error');
                 clickedStep.element.classList.add('incorrect-shake');
             }
         }
@@ -516,7 +516,7 @@
                      const button = document.createElement('button');
                      button.id = `${step.id}Button`;
                      button.className = 'step-button bg-stadt-blue text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00447a]';
-                     button.textContent = 'AusfÃ¼hren';
+                     button.textContent = 'Ausführen';
                      button.addEventListener('click', () => handleStepClick(index)); // Use original index
                      stepElement.appendChild(button);
                      step.buttonElement = button;
@@ -545,7 +545,7 @@
         setupSteps();
         createAllLines();
         updateTimeDisplay();
-        showFeedback('WÃ¤hle den ersten Schritt, um zu beginnen!', 'info');
+        showFeedback('Wähle den ersten Schritt, um zu beginnen!', 'info');
 
     </script>
 
